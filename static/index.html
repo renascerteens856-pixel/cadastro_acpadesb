@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="pt-br">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,417 +9,442 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
-    body {
-      background: #f5f5f5;
-    }
-
+    body { background: #f5f5f5; }
     .container-box {
       background: white;
       padding: 20px;
       border-radius: 10px;
       margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
-    #mensagem {
-      display: none;
-    }
-
-    .logo-img {
-      width: 150px;
-      display: block;
-      margin: 10px auto;
-    }
+    #mensagem { display: none; }
+    .logo-img { width: 150px; display:block; margin:10px auto; }
   </style>
 </head>
-
 <body>
 
-  <div class="container mt-4">
+<div class="container mt-4">
+  <img src="Images/logo_adolescentes.PNG" class="logo-img" alt="logo">
+  <h2 class="text-center mb-3">Cadastro de Adolescentes</h2>
 
-    <img src="Images/logo_adolescentes.PNG" class="logo-img" alt="logo">
+  <!-- FORMULÁRIO -->
+  <div class="container-box">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label>Nome completo</label>
+        <input id="nome" class="form-control" />
+      </div>
 
-    <h2 class="text-center mb-3">Cadastro de Adolescentes</h2>
+      <div class="col-md-4">
+        <label>Contato</label>
+        <input id="contato" class="form-control" maxlength="15" placeholder="(99) 99999-9999" />
+      </div>
 
-    <!-- FORMULÁRIO -->
-    <div class="container-box">
-      <div class="row g-3">
+      <div class="col-md-6">
+        <label>Nome do Pai</label>
+        <input id="nome_pai" class="form-control" />
+      </div>
 
-        <div class="col-md-8">
-          <label>Nome completo</label>
-          <input id="nome" class="form-control" />
-        </div>
+      <div class="col-md-6">
+        <label>Nome da Mãe</label>
+        <input id="nome_mae" class="form-control" />
+      </div>
 
-        <div class="col-md-4">
-          <label>Contato</label>
-          <input id="contato" class="form-control" maxlength="15" />
-        </div>
+      <div class="col-md-4">
+        <label>Data de Nascimento</label>
+        <input id="data_nasc" type="date" class="form-control" />
+      </div>
 
-        <div class="col-md-6">
-          <label>Nome do Pai</label>
-          <input id="nome_pai" class="form-control" />
-        </div>
+      <h5 class="mt-3">Endereço</h5>
 
-        <div class="col-md-6">
-          <label>Nome da Mãe</label>
-          <input id="nome_mae" class="form-control" />
-        </div>
+      <div class="col-md-6">
+        <label>Rua</label>
+        <input id="rua" class="form-control" />
+      </div>
 
-        <div class="col-md-4">
-          <label>Data de Nascimento</label>
-          <input id="data_nasc" type="date" class="form-control" />
-        </div>
+      <div class="col-md-3">
+        <label>Número</label>
+        <input id="numero" class="form-control" />
+      </div>
 
-        <h5 class="mt-3">Endereço</h5>
+      <div class="col-md-3">
+        <label>Bairro</label>
+        <input id="bairro" class="form-control" />
+      </div>
 
-        <div class="col-md-6">
-          <label>Rua</label>
-          <input id="rua" class="form-control" />
-        </div>
-
-        <div class="col-md-3">
-          <label>Número</label>
-          <input id="numero" class="form-control" />
-        </div>
-
-        <div class="col-md-3">
-          <label>Bairro</label>
-          <input id="bairro" class="form-control" />
-        </div>
-
-        <div class="col-12 mt-3">
-          <button onclick="salvarAdolescente()" class="btn btn-primary w-100">Salvar</button>
-        </div>
-
+      <div class="col-12 mt-3">
+        <button id="btn-salvar" class="btn btn-primary w-100">Salvar</button>
       </div>
     </div>
-
-    <!-- BUSCA -->
-    <div class="container-box mt-3">
-      <div class="row g-2">
-        <div class="col-md-8">
-          <input id="busca_nome" class="form-control" placeholder="Buscar por nome..." />
-        </div>
-        <div class="col-md-2">
-          <button onclick="buscar()" class="btn btn-outline-primary w-100">Pesquisar</button>
-        </div>
-        <div class="col-md-2">
-          <button onclick="listarTodos()" class="btn btn-secondary w-100">Listar Todos</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ERRO -->
-    <div id="mensagem" class="alert alert-danger mt-3"></div>
-
-    <!-- LISTA -->
-    <div id="lista" class="container-box mt-3"></div>
-
   </div>
 
-  <!-- MODAL EDITAR -->
-  <div class="modal fade" id="modalEditar" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
+  <!-- BUSCA -->
+  <div class="container-box mt-3">
+    <div class="row g-2">
+      <div class="col-md-8">
+        <input id="busca_nome" class="form-control" placeholder="Buscar por nome..." />
+      </div>
+      <div class="col-md-2">
+        <button id="btn-buscar" class="btn btn-outline-primary w-100">Pesquisar</button>
+      </div>
+      <div class="col-md-2">
+        <button id="btn-listar" class="btn btn-secondary w-100">Listar Todos</button>
+      </div>
+    </div>
+  </div>
 
-        <div class="modal-header">
-          <h5 class="modal-title">Editar Adolescente</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+  <!-- ERRO -->
+  <div id="mensagem" class="alert alert-danger mt-3" role="alert"></div>
 
-        <div class="modal-body">
+  <!-- LISTA -->
+  <div id="lista" class="container-box mt-3"></div>
+</div>
 
-          <input type="hidden" id="edit_id">
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Adolescente</h5>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
 
-          <div class="row g-3">
+      <div class="modal-body">
+        <input type="hidden" id="edit_id">
 
-            <div class="col-md-8">
-              <label>Nome completo</label>
-              <input id="edit_nome" class="form-control" />
-            </div>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label>Nome completo</label>
+            <input id="edit_nome" class="form-control" />
+          </div>
 
-            <div class="col-md-4">
-              <label>Contato</label>
-              <input id="edit_contato" class="form-control" maxlength="15" />
-            </div>
+          <div class="col-md-4">
+            <label>Contato</label>
+            <input id="edit_contato" class="form-control" maxlength="15" />
+          </div>
 
-            <div class="col-md-6">
-              <label>Nome do Pai</label>
-              <input id="edit_nome_pai" class="form-control" />
-            </div>
+          <div class="col-md-6">
+            <label>Nome do Pai</label>
+            <input id="edit_nome_pai" class="form-control" />
+          </div>
 
-            <div class="col-md-6">
-              <label>Nome da Mãe</label>
-              <input id="edit_nome_mae" class="form-control" />
-            </div>
+          <div class="col-md-6">
+            <label>Nome da Mãe</label>
+            <input id="edit_nome_mae" class="form-control" />
+          </div>
 
-            <div class="col-md-4">
-              <label>Data de Nascimento</label>
-              <input id="edit_data_nasc" type="date" class="form-control" />
-            </div>
+          <div class="col-md-4">
+            <label>Data de Nascimento</label>
+            <input id="edit_data_nasc" type="date" class="form-control" />
+          </div>
 
-            <h5>Endereço</h5>
+          <h5>Endereço</h5>
 
-            <div class="col-md-6">
-              <label>Rua</label>
-              <input id="edit_rua" class="form-control" />
-            </div>
+          <div class="col-md-6">
+            <label>Rua</label>
+            <input id="edit_rua" class="form-control" />
+          </div>
 
-            <div class="col-md-3">
-              <label>Número</label>
-              <input id="edit_numero" class="form-control" />
-            </div>
+          <div class="col-md-3">
+            <label>Número</label>
+            <input id="edit_numero" class="form-control" />
+          </div>
 
-            <div class="col-md-3">
-              <label>Bairro</label>
-              <input id="edit_bairro" class="form-control" />
-            </div>
-
+          <div class="col-md-3">
+            <label>Bairro</label>
+            <input id="edit_bairro" class="form-control" />
           </div>
         </div>
+      </div>
 
-        <div class="modal-footer">
-          <button onclick="salvarEdicao()" class="btn btn-primary">Salvar Alterações</button>
-        </div>
-
+      <div class="modal-footer">
+        <button id="btn-salvar-edit" class="btn btn-primary">Salvar Alterações</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- BOOTSTRAP JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
+<script>
+/* ============================
+   CONFIG
+   ============================ */
+const API_BASE = "https://cadastro-adolescentes.onrender.com";
 
-    const API_BASE = "https://cadastro-adolescentes.onrender.com";
+// shortcuts to DOM elements (explicit)
+const el = id => document.getElementById(id);
+const listaEl = el('lista');
+const msgEl = el('mensagem');
 
-    /* ==========================
-          MÁSCARA CONTATO
-    =========================== */
-    function mascaraContato(v) {
-      v = v.replace(/\D/g, "");
-      v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-      v = v.replace(/(\d{5})(\d)/, "$1-$2");
-      return v;
+function showError(msg, consoleObj) {
+  msgEl.style.display = 'block';
+  msgEl.textContent = msg;
+  console.error('Frontend error:', msg, consoleObj || '');
+}
+
+// máscara para contato
+function mascaraContato(v) {
+  v = v.replace(/\D/g, "");
+  v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+  v = v.replace(/(\d{5})(\d)/, "$1-$2");
+  return v;
+}
+
+/* ============================
+   Eventos iniciais
+   ============================ */
+el('btn-salvar').addEventListener('click', salvarAdolescente);
+el('btn-buscar').addEventListener('click', buscar);
+el('btn-listar').addEventListener('click', listarTodos);
+el('contato').addEventListener('input', e => e.target.value = mascaraContato(e.target.value));
+el('edit_contato').addEventListener('input', e => e.target.value = mascaraContato(e.target.value));
+el('btn-salvar-edit').addEventListener('click', salvarEdicao);
+
+/* ============================
+   FUNÇÕES AJAX (com tratamento)
+   ============================ */
+
+async function safeFetch(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      // tenta ler texto/json do corpo para detalhar
+      let bodyText;
+      try { bodyText = await res.text(); } catch(e) { bodyText = '<no body>'; }
+      throw { status: res.status, statusText: res.statusText, body: bodyText };
+    }
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return await res.json();
+    return await res.text();
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function listarTodos() {
+  msgEl.style.display = 'none';
+  try {
+    const dados = await safeFetch(`${API_BASE}/adolescentes`);
+    renderLista(dados);
+  } catch (err) {
+    showError('Erro ao carregar dados — ver console (Network/Response).', err);
+  }
+}
+
+async function buscar() {
+  msgEl.style.display = 'none';
+  const nome = el('busca_nome').value.trim();
+  if (!nome) return listarTodos();
+  try {
+    // usa querystring conforme seu backend
+    const dados = await safeFetch(`${API_BASE}/adolescentes?nome=${encodeURIComponent(nome)}`);
+    renderLista(dados);
+  } catch (err) {
+    showError('Erro ao buscar — ver console (Network/Response).', err);
+  }
+}
+
+async function salvarAdolescente() {
+  msgEl.style.display = 'none';
+  const payload = {
+    nome: el('nome').value,
+    contato: el('contato').value.replace(/\D/g,''),
+    nome_pai: el('nome_pai').value,
+    nome_mae: el('nome_mae').value,
+    data_nasc: el('data_nasc').value || null,
+    rua: el('rua').value,
+    numero: el('numero').value,
+    bairro: el('bairro').value
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/adolescentes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(()=>'<no body>');
+      showError(`Erro ao salvar: ${res.status} ${res.statusText} — veja console.`, text);
+      return;
     }
 
-    contato.addEventListener("input", e => e.target.value = mascaraContato(e.target.value));
-    edit_contato.addEventListener("input", e => e.target.value = mascaraContato(e.target.value));
+    // sucesso
+    listarTodos();
+    // limpa formulário
+    el('nome').value = el('contato').value = el('nome_pai').value = el('nome_mae').value = '';
+    el('data_nasc').value = el('rua').value = el('numero').value = el('bairro').value = '';
+  } catch (err) {
+    showError('Erro de conexão ao salvar — ver console.', err);
+  }
+}
 
-    /* ==========================
-          LISTAR TODOS
-    =========================== */
-    async function listarTodos() {
-      try {
-        const res = await fetch(`${API_BASE}/adolescentes`);
-        const dados = await res.json();
-        mostrarLista(dados);
-      } catch {
-        erro("Erro ao carregar dados.");
-      }
+async function editar(id) {
+  msgEl.style.display = 'none';
+  try {
+    const d = await safeFetch(`${API_BASE}/adolescentes/${id}`);
+    // preenche modal com campos simples (sem objeto endereco)
+    el('edit_id').value = d.id ?? id;
+    el('edit_nome').value = d.nome || '';
+    el('edit_contato').value = d.contato ? mascaraContato(String(d.contato)) : '';
+    el('edit_nome_pai').value = d.nome_pai || '';
+    el('edit_nome_mae').value = d.nome_mae || '';
+    el('edit_data_nasc').value = d.data_nasc || '';
+    el('edit_rua').value = d.rua || '';
+    el('edit_numero').value = d.numero || '';
+    el('edit_bairro').value = d.bairro || '';
+
+    new bootstrap.Modal(document.getElementById('modalEditar')).show();
+  } catch (err) {
+    showError('Erro ao carregar registro para edição — ver console.', err);
+  }
+}
+
+async function salvarEdicao() {
+  msgEl.style.display = 'none';
+  const id = el('edit_id').value;
+  if (!id) { showError('ID ausente para edição.'); return; }
+
+  const payload = {
+    nome: el('edit_nome').value,
+    contato: el('edit_contato').value.replace(/\D/g,''),
+    nome_pai: el('edit_nome_pai').value,
+    nome_mae: el('edit_nome_mae').value,
+    data_nasc: el('edit_data_nasc').value || null,
+    rua: el('edit_rua').value,
+    numero: el('edit_numero').value,
+    bairro: el('edit_bairro').value
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/adolescentes/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(()=>'<no body>');
+      showError(`Erro ao salvar edição: ${res.status} ${res.statusText} — veja console.`, text);
+      return;
     }
 
-    /* ==========================
-          BUSCA POR NOME
-    =========================== */
-    async function buscar() {
-      const nome = busca_nome.value.trim();
-      if (!nome) return listarTodos();
+    // fechar modal e recarregar
+    bootstrap.Modal.getInstance(document.getElementById('modalEditar'))?.hide();
+    listarTodos();
+  } catch (err) {
+    showError('Erro de conexão ao salvar edição — ver console.', err);
+  }
+}
 
-      try {
-        const res = await fetch(`${API_BASE}/adolescentes?nome=${nome}`);
-        const dados = await res.json();
-        mostrarLista(dados);
-      } catch {
-        erro("Erro ao buscar.");
-      }
+async function deletar(id) {
+  if (!confirm('Deseja excluir este registro?')) return;
+  msgEl.style.display = 'none';
+  try {
+    const res = await fetch(`${API_BASE}/adolescentes/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const text = await res.text().catch(()=>'<no body>');
+      showError(`Erro ao excluir: ${res.status} ${res.statusText}`, text);
+      return;
     }
+    listarTodos();
+  } catch (err) {
+    showError('Erro de conexão ao excluir — ver console.', err);
+  }
+}
 
-    /* ==========================
-          CADASTRAR
-    =========================== */
-    async function salvarAdolescente() {
-      const payload = {
-        nome: nome.value,
-        contato: contato.value,
-        nome_pai: nome_pai.value,
-        nome_mae: nome_mae.value,
-        data_nasc: data_nasc.value,
-        rua: rua.value,
-        numero: numero.value,
-        bairro: bairro.value
-      };
+/* ============================
+   RENDER LISTA
+   ============================ */
+function renderLista(data) {
+  // data pode ser array ou objeto único
+  const arr = Array.isArray(data) ? data : (data ? [data] : []);
+  if (!arr.length) {
+    listaEl.innerHTML = `<p class="text-center mb-0">Nenhum registro encontrado.</p>`;
+    return;
+  }
 
-      try {
-        await fetch(`${API_BASE}/adolescentes`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+  let html = `
+    <table class="table table-striped table-sm mb-0">
+      <thead><tr><th>Nome</th><th>Contato</th><th style="width:260px">Ações</th></tr></thead>
+      <tbody>
+  `;
 
-        listarTodos();
+  arr.forEach(d => {
+    // segura valores nulos
+    const id = d.id ?? d.ID ?? d.id_adolescente ?? '';
+    const contatoFmt = d.contato ? mascaraContato(String(d.contato)) : '-';
+    html += `
+      <tr>
+        <td>${escapeHtml(d.nome ?? '')}</td>
+        <td>${escapeHtml(contatoFmt)}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editar('${id}')">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="deletar('${id}')">Excluir</button>
+          <button class="btn btn-sm btn-primary" onclick='imprimirRegistro(${JSON.stringify(d)})'>Imprimir</button>
+        </td>
+      </tr>
+    `;
+  });
 
-      } catch {
-        erro("Erro ao salvar.");
-      }
-    }
+  html += '</tbody></table>';
+  listaEl.innerHTML = html;
+}
 
-    /* ==========================
-          EDITAR - ABRIR MODAL
-    =========================== */
-    async function editar(id) {
-      const r = await fetch(`${API_BASE}/adolescentes/${id}`);
-      const d = await r.json();
+// pequeno helper para escapar html ao renderizar
+function escapeHtml(str) {
+  return String(str || '')
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#039;');
+}
 
-      edit_id.value = d.id;
-      edit_nome.value = d.nome;
-      edit_contato.value = mascaraContato(d.contato);
-      edit_nome_pai.value = d.nome_pai;
-      edit_nome_mae.value = d.nome_mae;
-      edit_data_nasc.value = d.data_nasc;
-      edit_rua.value = d.rua;
-      edit_numero.value = d.numero;
-      edit_bairro.value = d.bairro;
+/* ============================
+   IMPRESSÃO
+   ============================ */
+function imprimirRegistro(d) {
+  const nome = escapeHtml(d.nome || '');
+  const pai = escapeHtml(d.nome_pai || '-');
+  const mae = escapeHtml(d.nome_mae || '-');
+  const contato = escapeHtml(d.contato ? mascaraContato(String(d.contato)) : '-');
+  const nasc = escapeHtml(d.data_nasc || '-');
+  const rua = escapeHtml(d.rua || '');
+  const numero = escapeHtml(d.numero || '');
+  const bairro = escapeHtml(d.bairro || '');
 
-      new bootstrap.Modal(modalEditar).show();
-    }
+  const html = `
+  <!doctype html><html><head><meta charset="utf-8"><title>Ficha</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>.logo{width:180px;margin:20px auto;display:block}</style>
+  </head><body>
+    <img src="Images/logo_adolescentes.PNG" class="logo" alt="logo">
+    <div class="container">
+      <h3 class="text-center">Ficha do Adolescente</h3><hr>
+      <p><strong>Nome:</strong> ${nome}</p>
+      <p><strong>Pai:</strong> ${pai}</p>
+      <p><strong>Mãe:</strong> ${mae}</p>
+      <p><strong>Contato:</strong> ${contato}</p>
+      <p><strong>Data de nascimento:</strong> ${nasc}</p>
+      <p><strong>Endereço:</strong> ${rua}, ${numero} - ${bairro}</p>
+    </div>
+    <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}</script>
+  </body></html>
+  `;
 
-    /* ==========================
-          SALVAR EDIÇÃO
-    =========================== */
-    async function salvarEdicao() {
-      const id = edit_id.value;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
 
-      const payload = {
-        nome: edit_nome.value,
-        contato: edit_contato.value,
-        nome_pai: edit_nome_pai.value,
-        nome_mae: edit_nome_mae.value,
-        data_nasc: edit_data_nasc.value,
-        rua: edit_rua.value,
-        numero: edit_numero.value,
-        bairro: edit_bairro.value
-      };
-
-      await fetch(`${API_BASE}/adolescentes/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      listarTodos();
-    }
-
-    /* ==========================
-          DELETAR
-    =========================== */
-    async function deletar(id) {
-      if (!confirm("Deseja excluir este registro?")) return;
-
-      await fetch(`${API_BASE}/adolescentes/${id}`, {
-        method: "DELETE"
-      });
-
-      listarTodos();
-    }
-
-    /* ==========================
-          IMPRIMIR
-    =========================== */
-    function imprimirRegistro(d) {
-      const html = `
-      <!doctype html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Ficha</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
-        <style>
-          .logo { width: 180px; margin: 20px auto; display:block; }
-        </style>
-      </head>
-      <body>
-
-        <img src="Images/logo_adolescentes.PNG" class="logo">
-
-        <div class="container">
-          <h3 class="text-center">Ficha do Adolescente</h3>
-          <hr>
-          <p><strong>Nome:</strong> ${d.nome}</p>
-          <p><strong>Pai:</strong> ${d.nome_pai}</p>
-          <p><strong>Mãe:</strong> ${d.nome_mae}</p>
-          <p><strong>Contato:</strong> ${d.contato}</p>
-          <p><strong>Data de nascimento:</strong> ${d.data_nasc}</p>
-          <p><strong>Endereço:</strong> ${d.rua}, ${d.numero} - ${d.bairro}</p>
-        </div>
-
-        <script>
-          window.onload = () => {
-            window.print();
-            window.onafterprint = () => window.close();
-          }
-        <\/script>
-
-      </body>
-      </html>
-      `;
-
-      const w = window.open("", "_blank");
-      w.document.write(html);
-      w.document.close();
-    }
-
-    /* ==========================
-          EXIBIR LISTA
-    =========================== */
-    function mostrarLista(lista) {
-
-      if (!lista || lista.length === 0) {
-        listaDiv.innerHTML = `<p class="text-center">Nenhum registro encontrado.</p>`;
-        return;
-      }
-
-      let html = `
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Contato</th>
-              <th style="width: 260px;">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      lista.forEach(d => {
-        html += `
-          <tr>
-            <td>${d.nome}</td>
-            <td>${d.contato}</td>
-            <td>
-              <button class="btn btn-sm btn-warning" onclick="editar(${d.id})">Editar</button>
-              <button class="btn btn-sm btn-danger" onclick="deletar(${d.id})">Excluir</button>
-              <button class="btn btn-sm btn-primary" onclick='imprimirRegistro(${JSON.stringify(d)})'>Imprimir</button>
-            </td>
-          </tr>
-        `;
-      });
-
-      html += "</tbody></table>";
-      lista.innerHTML = html;
-    }
-
-    /* ==========================
-          ERRO
-    =========================== */
-    function erro(msg) {
-      mensagem.style.display = "block";
-      mensagem.innerText = msg;
-    }
-
-    window.onload = listarTodos;
-
-  </script>
+/* ============================
+   Inicializa
+   ============================ */
+window.addEventListener('DOMContentLoaded', () => {
+  listarTodos();
+});
+</script>
 
 </body>
 </html>
