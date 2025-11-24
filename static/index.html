@@ -17,22 +17,23 @@
       margin-top: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    #mensagem { display: none; }
+    #mensagem, #sucesso { display: none; }
     .logo-img { width: 150px; display:block; margin:10px auto; }
+    .btn-action { margin: 2px; }
   </style>
 </head>
 <body>
 
 <div class="container mt-4">
-  <img src="{{ url_for('static', filename='Images/logo_adolescentes.PNG') }}" class="logo-img" alt="logo">
+  <img src="/static/Images/logo_adolescentes.PNG" class="logo-img" alt="logo" onerror="this.style.display='none'">
   <h2 class="text-center mb-3">Cadastro de Adolescentes</h2>
 
   <!-- FORMULÁRIO -->
   <div class="container-box">
     <div class="row g-3">
       <div class="col-md-8">
-        <label class="form-label">Nome completo</label>
-        <input id="nome" class="form-control" />
+        <label class="form-label">Nome completo *</label>
+        <input id="nome" class="form-control" required />
       </div>
 
       <div class="col-md-4">
@@ -55,7 +56,9 @@
         <input id="data_nasc" type="date" class="form-control" />
       </div>
 
-      <h5 class="mt-3">Endereço</h5>
+      <div class="col-12">
+        <h5 class="mt-3">Endereço</h5>
+      </div>
 
       <div class="col-md-6">
         <label class="form-label">Rua</label>
@@ -73,7 +76,7 @@
       </div>
 
       <div class="col-12 mt-3">
-        <button id="btn-salvar" class="btn btn-primary w-100">Salvar</button>
+        <button id="btn-salvar" class="btn btn-primary w-100">Salvar Adolescente</button>
       </div>
     </div>
   </div>
@@ -95,10 +98,12 @@
 
   <!-- MENSAGENS -->
   <div id="mensagem" class="alert alert-danger mt-3" role="alert"></div>
-  <div id="sucesso" class="alert alert-success mt-3" style="display:none;" role="alert"></div>
+  <div id="sucesso" class="alert alert-success mt-3" role="alert"></div>
 
   <!-- LISTA -->
-  <div id="lista" class="container-box mt-3"></div>
+  <div id="lista" class="container-box mt-3">
+    <p class="text-center text-muted">Carregando dados...</p>
+  </div>
 </div>
 
 <!-- MODAL EDITAR -->
@@ -107,7 +112,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Editar Adolescente</h5>
-        <button class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
 
       <div class="modal-body">
@@ -115,8 +120,8 @@
 
         <div class="row g-3">
           <div class="col-md-8">
-            <label class="form-label">Nome completo</label>
-            <input id="edit_nome" class="form-control" />
+            <label class="form-label">Nome completo *</label>
+            <input id="edit_nome" class="form-control" required />
           </div>
 
           <div class="col-md-4">
@@ -139,7 +144,9 @@
             <input id="edit_data_nasc" type="date" class="form-control" />
           </div>
 
-          <h5>Endereço</h5>
+          <div class="col-12">
+            <h5>Endereço</h5>
+          </div>
 
           <div class="col-md-6">
             <label class="form-label">Rua</label>
@@ -170,23 +177,25 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-/* ============================
-   CONFIG
-   ============================ */
-// Usa URL relativa para funcionar em qualquer ambiente
-const API_BASE = "";
+// ============================
+// CONFIGURAÇÃO
+// ============================
+const API_BASE = "https://cadastro-adolescentes.onrender.com/"; // URL relativa para o mesmo domínio
 
-// shortcuts to DOM elements
+// Elementos DOM
 const el = id => document.getElementById(id);
 const listaEl = el('lista');
 const msgEl = el('mensagem');
 const successEl = el('sucesso');
 
-function showError(msg, consoleObj) {
+// ============================
+// FUNÇÕES DE UTILIDADE
+// ============================
+function showError(msg) {
   msgEl.style.display = 'block';
   msgEl.textContent = msg;
   successEl.style.display = 'none';
-  console.error('Erro:', msg, consoleObj || '');
+  console.error('Erro:', msg);
 }
 
 function showSuccess(msg) {
@@ -200,41 +209,75 @@ function hideMessages() {
   successEl.style.display = 'none';
 }
 
-// máscara para contato
 function mascaraContato(v) {
   v = v.replace(/\D/g, "");
   if (v.length === 0) return "";
-  v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-  v = v.replace(/(\d{5})(\d)/, "$1-$2");
+  if (v.length <= 10) {
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d{4})(\d)/, "$1-$2");
+  } else {
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d{5})(\d)/, "$1-$2");
+  }
   return v;
 }
 
-/* ============================
-   Eventos iniciais
-   ============================ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ============================
+// EVENT LISTENERS
+// ============================
 document.addEventListener('DOMContentLoaded', function() {
+  // Eventos dos botões
   el('btn-salvar').addEventListener('click', salvarAdolescente);
   el('btn-buscar').addEventListener('click', buscar);
   el('btn-listar').addEventListener('click', listarTodos);
-  el('contato').addEventListener('input', e => e.target.value = mascaraContato(e.target.value));
-  el('edit_contato').addEventListener('input', e => e.target.value = mascaraContato(e.target.value));
   el('btn-salvar-edit').addEventListener('click', salvarEdicao);
-  
-  // Carrega a lista inicial
+
+  // Máscaras de input
+  el('contato').addEventListener('input', e => {
+    e.target.value = mascaraContato(e.target.value);
+  });
+
+  el('edit_contato').addEventListener('input', e => {
+    e.target.value = mascaraContato(e.target.value);
+  });
+
+  // Buscar ao pressionar Enter
+  el('busca_nome').addEventListener('keypress', e => {
+    if (e.key === 'Enter') buscar();
+  });
+
+  // Carregar dados iniciais
   listarTodos();
 });
 
-/* ============================
-   FUNÇÕES AJAX
-   ============================ */
-
+// ============================
+// FUNÇÕES API
+// ============================
 async function safeFetch(url, options = {}) {
   try {
-    const res = await fetch(url, options);
+    const res = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      ...options
+    });
+
     if (!res.ok) {
-      let errorText = await res.text().catch(() => 'Erro desconhecido');
+      const errorText = await res.text().catch(() => 'Erro desconhecido');
       throw new Error(`HTTP ${res.status}: ${errorText}`);
     }
+
     return await res.json();
   } catch (err) {
     throw err;
@@ -254,7 +297,11 @@ async function listarTodos() {
 async function buscar() {
   hideMessages();
   const nome = el('busca_nome').value.trim();
-  if (!nome) return listarTodos();
+  if (!nome) {
+    listarTodos();
+    return;
+  }
+
   try {
     const dados = await safeFetch(`${API_BASE}/adolescentes?nome=${encodeURIComponent(nome)}`);
     renderLista(dados);
@@ -265,10 +312,11 @@ async function buscar() {
 
 async function salvarAdolescente() {
   hideMessages();
-  
+
+  // Coletar dados do formulário
   const payload = {
     nome: el('nome').value.trim(),
-    contato: el('contato').value.replace(/\D/g,''),
+    contato: el('contato').value.replace(/\D/g, ''),
     nome_pai: el('nome_pai').value.trim(),
     nome_mae: el('nome_mae').value.trim(),
     data_nasc: el('data_nasc').value,
@@ -277,32 +325,27 @@ async function salvarAdolescente() {
     bairro: el('bairro').value.trim()
   };
 
-  // Validação básica
+  // Validação
   if (!payload.nome) {
     showError('Nome é obrigatório');
+    el('nome').focus();
     return;
   }
 
   try {
     const response = await safeFetch(`${API_BASE}/adolescentes`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
     showSuccess('Adolescente cadastrado com sucesso!');
+
+    // Limpar formulário
+    limparFormulario();
+
+    // Atualizar lista
     listarTodos();
-    
-    // Limpa formulário
-    el('nome').value = '';
-    el('contato').value = '';
-    el('nome_pai').value = '';
-    el('nome_mae').value = '';
-    el('data_nasc').value = '';
-    el('rua').value = '';
-    el('numero').value = '';
-    el('bairro').value = '';
-    
+
   } catch (err) {
     showError('Erro ao salvar: ' + err.message);
   }
@@ -312,7 +355,8 @@ async function editar(id) {
   hideMessages();
   try {
     const data = await safeFetch(`${API_BASE}/adolescentes/${id}`);
-    
+
+    // Preencher modal com dados
     el('edit_id').value = data.id;
     el('edit_nome').value = data.nome || '';
     el('edit_contato').value = data.contato ? mascaraContato(String(data.contato)) : '';
@@ -323,7 +367,10 @@ async function editar(id) {
     el('edit_numero').value = data.numero || '';
     el('edit_bairro').value = data.bairro || '';
 
-    new bootstrap.Modal(el('modalEditar')).show();
+    // Abrir modal
+    const modal = new bootstrap.Modal(el('modalEditar'));
+    modal.show();
+
   } catch (err) {
     showError('Erro ao carregar dados para edição: ' + err.message);
   }
@@ -332,6 +379,7 @@ async function editar(id) {
 async function salvarEdicao() {
   hideMessages();
   const id = el('edit_id').value;
+
   if (!id) {
     showError('ID não encontrado para edição');
     return;
@@ -339,7 +387,7 @@ async function salvarEdicao() {
 
   const payload = {
     nome: el('edit_nome').value.trim(),
-    contato: el('edit_contato').value.replace(/\D/g,''),
+    contato: el('edit_contato').value.replace(/\D/g, ''),
     nome_pai: el('edit_nome_pai').value.trim(),
     nome_mae: el('edit_nome_mae').value.trim(),
     data_nasc: el('edit_data_nasc').value,
@@ -350,46 +398,55 @@ async function salvarEdicao() {
 
   if (!payload.nome) {
     showError('Nome é obrigatório');
+    el('edit_nome').focus();
     return;
   }
 
   try {
     await safeFetch(`${API_BASE}/adolescentes/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
     showSuccess('Adolescente atualizado com sucesso!');
-    bootstrap.Modal.getInstance(el('modalEditar')).hide();
+
+    // Fechar modal e atualizar lista
+    const modal = bootstrap.Modal.getInstance(el('modalEditar'));
+    modal.hide();
     listarTodos();
+
   } catch (err) {
     showError('Erro ao salvar edição: ' + err.message);
   }
 }
 
 async function deletar(id) {
-  if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+  if (!confirm('Tem certeza que deseja excluir este registro?')) {
+    return;
+  }
+
   hideMessages();
   try {
-    await safeFetch(`${API_BASE}/adolescentes/${id}`, { 
-      method: 'DELETE' 
+    await safeFetch(`${API_BASE}/adolescentes/${id}`, {
+      method: 'DELETE'
     });
+
     showSuccess('Adolescente excluído com sucesso!');
     listarTodos();
+
   } catch (err) {
     showError('Erro ao excluir: ' + err.message);
   }
 }
 
-/* ============================
-   RENDER LISTA
-   ============================ */
+// ============================
+// RENDERIZAÇÃO
+// ============================
 function renderLista(data) {
   const arr = Array.isArray(data) ? data : (data ? [data] : []);
-  
+
   if (!arr.length) {
-    listaEl.innerHTML = `<p class="text-center mb-0 text-muted">Nenhum registro encontrado.</p>`;
+    listaEl.innerHTML = '<p class="text-center mb-0 text-muted">Nenhum registro encontrado.</p>';
     return;
   }
 
@@ -401,7 +458,7 @@ function renderLista(data) {
             <th>Nome</th>
             <th>Contato</th>
             <th>Data Nasc.</th>
-            <th style="width:280px">Ações</th>
+            <th style="width:300px">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -410,16 +467,16 @@ function renderLista(data) {
   arr.forEach(d => {
     const contatoFmt = d.contato ? mascaraContato(String(d.contato)) : '-';
     const dataNasc = d.data_nasc ? new Date(d.data_nasc).toLocaleDateString('pt-BR') : '-';
-    
+
     html += `
       <tr>
         <td>${escapeHtml(d.nome || '')}</td>
         <td>${escapeHtml(contatoFmt)}</td>
         <td>${escapeHtml(dataNasc)}</td>
         <td>
-          <button class="btn btn-sm btn-warning me-1" onclick="editar(${d.id})">Editar</button>
-          <button class="btn btn-sm btn-danger me-1" onclick="deletar(${d.id})">Excluir</button>
-          <button class="btn btn-sm btn-info" onclick='imprimirRegistro(${JSON.stringify(d)})'>Imprimir</button>
+          <button class="btn btn-sm btn-warning btn-action" onclick="editar(${d.id})">Editar</button>
+          <button class="btn btn-sm btn-danger btn-action" onclick="deletar(${d.id})">Excluir</button>
+          <button class="btn btn-sm btn-info btn-action" onclick="imprimirRegistro(${d.id})">Imprimir</button>
         </td>
       </tr>
     `;
@@ -429,72 +486,107 @@ function renderLista(data) {
   listaEl.innerHTML = html;
 }
 
-function escapeHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+function limparFormulario() {
+  const campos = ['nome', 'contato', 'nome_pai', 'nome_mae', 'data_nasc', 'rua', 'numero', 'bairro'];
+  campos.forEach(campo => {
+    el(campo).value = '';
+  });
 }
 
-/* ============================
-   IMPRESSÃO
-   ============================ */
-function imprimirRegistro(d) {
-  const nome = escapeHtml(d.nome || '');
-  const pai = escapeHtml(d.nome_pai || '-');
-  const mae = escapeHtml(d.nome_mae || '-');
-  const contato = escapeHtml(d.contato ? mascaraContato(String(d.contato)) : '-');
-  const nasc = escapeHtml(d.data_nasc ? new Date(d.data_nasc).toLocaleDateString('pt-BR') : '-');
-  const rua = escapeHtml(d.rua || '');
-  const numero = escapeHtml(d.numero || '');
-  const bairro = escapeHtml(d.bairro || '');
+// ============================
+// IMPRESSÃO
+// ============================
+async function imprimirRegistro(id) {
+  try {
+    const data = await safeFetch(`${API_BASE}/adolescentes/${id}`);
 
-  const html = `
-  <!doctype html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Ficha do Adolescente</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 20px; }
-      .logo { width: 180px; margin: 20px auto; display: block; }
-      @media print { body { margin: 0; } }
-    </style>
-  </head>
-  <body>
-    <img src="${window.location.origin}${API_BASE}/static/Images/logo_adolescentes.PNG" class="logo" alt="logo">
-    <div class="container">
-      <h3 class="text-center mb-4">Ficha do Adolescente</h3>
-      <hr>
-      <div class="row">
-        <div class="col-md-6">
-          <p><strong>Nome:</strong> ${nome}</p>
-          <p><strong>Pai:</strong> ${pai}</p>
-          <p><strong>Mãe:</strong> ${mae}</p>
-        </div>
-        <div class="col-md-6">
-          <p><strong>Contato:</strong> ${contato}</p>
-          <p><strong>Data de nascimento:</strong> ${nasc}</p>
-          <p><strong>Endereço:</strong> ${rua}, ${numero} - ${bairro}</p>
+    const nome = escapeHtml(data.nome || '');
+    const pai = escapeHtml(data.nome_pai || '-');
+    const mae = escapeHtml(data.nome_mae || '-');
+    const contato = escapeHtml(data.contato ? mascaraContato(String(data.contato)) : '-');
+    const nasc = escapeHtml(data.data_nasc ? new Date(data.data_nasc).toLocaleDateString('pt-BR') : '-');
+    const rua = escapeHtml(data.rua || '');
+    const numero = escapeHtml(data.numero || '');
+    const bairro = escapeHtml(data.bairro || '');
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Ficha do Adolescente</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    @media print {
+      body { margin: 10px; }
+      .no-print { display: none; }
+    }
+    .header { text-align: center; margin-bottom: 20px; }
+    .foto { width: 120px; height: 150px; border: 1px solid #ccc; margin: 0 auto 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>Ficha do Adolescente</h3>
+    <hr>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>Nome:</strong> ${nome}</p>
+        <p><strong>Nome do Pai:</strong> ${pai}</p>
+        <p><strong>Nome da Mãe:</strong> ${mae}</p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Contato:</strong> ${contato}</p>
+        <p><strong>Data de Nascimento:</strong> ${nasc}</p>
+        <p><strong>Endereço:</strong> ${rua}, ${numero} - ${bairro}</p>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="foto">
+          <small class="text-muted d-block text-center mt-5">Foto 3x4</small>
         </div>
       </div>
     </div>
-    <script>
-      window.onload = function() {
-        window.print();
-        setTimeout(() => window.close(), 100);
-      }
-    </script>
-  </body>
-  </html>
-  `;
 
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
+    <div class="row mt-5">
+      <div class="col-12">
+        <p class="text-center border-top pt-3">
+          _________________________________________<br>
+          <small>Assinatura do Responsável</small>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-print text-center mt-4">
+    <button onclick="window.print()" class="btn btn-primary me-2">Imprimir</button>
+    <button onclick="window.close()" class="btn btn-secondary">Fechar</button>
+  </div>
+
+  <script>
+    window.onload = function() {
+      // Focar na impressão automaticamente
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>`;
+
+    const janela = window.open('', '_blank', 'width=800,height=600');
+    janela.document.write(html);
+    janela.document.close();
+
+  } catch (err) {
+    showError('Erro ao gerar impressão: ' + err.message);
+  }
 }
 </script>
 </body>
