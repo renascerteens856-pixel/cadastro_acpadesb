@@ -1,151 +1,96 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cadastro de Adolescentes</title>
-
-  <!-- BOOTSTRAP -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-  <style>
-    body { background: #f5f5f5; }
-    .container-box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .logo-img { width: 160px; display:block; margin:10px auto 20px; }
-    #mensagem { display:none; }
-  </style>
-</head>
-
-<body>
-
-<div class="container mt-4">
-
-  <!-- LOGO -->
-  <img src="Images/logo_adolescentes.PNG" alt="Logo" class="logo-img">
-
-  <h2 class="text-center mb-3">Cadastro de Adolescentes</h2>
-
-  <!-- MENSAGEM -->
-  <div id="mensagem" class="alert"></div>
-
-  <!-- FORMULÁRIO -->
-  <div class="container-box">
-    <div class="row g-3">
-
-      <div class="col-md-8">
-        <label>Nome completo</label>
-        <input id="nome" class="form-control" />
-      </div>
-
-      <div class="col-md-4">
-        <label>Contato</label>
-        <input id="contato" class="form-control" placeholder="(99) 99999-9999" />
-      </div>
-
-      <div class="col-md-6">
-        <label>Nome do Pai</label>
-        <input id="nome_pai" class="form-control" />
-      </div>
-
-      <div class="col-md-6">
-        <label>Nome da Mãe</label>
-        <input id="nome_mae" class="form-control" />
-      </div>
-
-      <div class="col-md-4">
-        <label>Data de Nascimento</label>
-        <input id="data_nasc" type="date" class="form-control" />
-      </div>
-
-      <h5 class="mt-3">Endereço</h5>
-
-      <div class="col-md-6">
-        <label>Rua</label>
-        <input id="rua" class="form-control" />
-      </div>
-
-      <div class="col-md-3">
-        <label>Número</label>
-        <input id="numero" class="form-control" />
-      </div>
-
-      <div class="col-md-3">
-        <label>Bairro</label>
-        <input id="bairro" class="form-control" />
-      </div>
-
-      <div class="col-12 mt-3">
-        <button onclick="salvarAdolescente()" class="btn btn-primary w-100">Salvar</button>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
 <script>
-/* =========================================
-        CONFIGURAÇÃO
-========================================= */
-const API_BASE = "https://cadastro-adolescentes.onrender.com";
+// ===============================
+// BUSCAR POR NOME
+// ===============================
+async function buscarPorNome() {
+    const nome = document.getElementById("buscarNome").value;
 
-/* =========================================
-       MENSAGEM DE FEEDBACK
-========================================= */
-function mostrarMensagem(texto, tipo="success") {
-  const msg = document.getElementById("mensagem");
-  msg.style.display = "block";
-  msg.className = "alert alert-" + tipo;
-  msg.innerText = texto;
+    const url = nome.trim()
+        ? `https://cadastro-adolescentes.onrender.com/adolescentes?nome=${encodeURIComponent(nome)}`
+        : `https://cadastro-adolescentes.onrender.com/adolescentes`;
 
-  setTimeout(() => msg.style.display = "none", 3000);
+    const resposta = await fetch(url);
+    const dados = await resposta.json();
+
+    mostrarLista(dados);
 }
 
-/* =========================================
-       SALVAR NOVO ADOLESCENTE (POST)
-========================================= */
-async function salvarAdolescente() {
+// ===============================
+// MOSTRAR LISTA DE ADOLESCENTES
+// ===============================
+function mostrarLista(lista) {
+    const tbody = document.getElementById("listaAdolescentes");
+    tbody.innerHTML = "";
 
-  const payload = {
-    nome: nome.value.trim(),
-    contato: contato.value.trim(),
-    nome_pai: nome_pai.value.trim(),
-    nome_mae: nome_mae.value.trim(),
-    data_nasc: data_nasc.value,
-    rua: rua.value.trim(),
-    numero: numero.value.trim(),
-    bairro: bairro.value.trim()
-  };
+    lista.forEach(a => {
+        const tr = document.createElement("tr");
 
-  try {
-    const response = await fetch(`${API_BASE}/adolescentes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+        tr.innerHTML = `
+            <td>${a.id}</td>
+            <td>${a.nome}</td>
+            <td>${a.idade}</td>
+            <td>${a.contato}</td>
+            <td>${a.endereco?.rua || ""}, ${a.endereco?.numero || ""}, ${a.endereco?.bairro || ""}</td>
+            <td>
+                <button onclick="carregarParaEdicao(${a.id})">Editar</button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+// ===============================
+// BUSCAR POR ID E PREPARAR FORMULÁRIO DE EDIÇÃO
+// ===============================
+async function carregarParaEdicao(id) {
+    const resposta = await fetch(`https://cadastro-adolescentes.onrender.com/adolescentes/${id}`);
+    const dados = await resposta.json();
+
+    document.getElementById("idEdicao").value = dados.id;
+    document.getElementById("nomeEdicao").value = dados.nome;
+    document.getElementById("idadeEdicao").value = dados.idade;
+    document.getElementById("contatoEdicao").value = dados.contato;
+
+    document.getElementById("ruaEdicao").value = dados.endereco?.rua || "";
+    document.getElementById("numeroEdicao").value = dados.endereco?.numero || "";
+    document.getElementById("bairroEdicao").value = dados.endereco?.bairro || "";
+
+    document.getElementById("formEdicao").style.display = "block";
+}
+
+// ===============================
+// SALVAR ALTERAÇÕES (PUT)
+// ===============================
+async function salvarAlteracoes() {
+    const id = document.getElementById("idEdicao").value;
+
+    const corpo = {
+        nome: document.getElementById("nomeEdicao").value,
+        idade: parseInt(document.getElementById("idadeEdicao").value),
+        contato: document.getElementById("contatoEdicao").value,
+        endereco: {
+            rua: document.getElementById("ruaEdicao").value,
+            numero: document.getElementById("numeroEdicao").value,
+            bairro: document.getElementById("bairroEdicao").value
+        }
+    };
+
+    const resposta = await fetch(`https://cadastro-adolescentes.onrender.com/adolescentes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo)
     });
 
-    if (!response.ok) {
-      const erro = await response.json();
-      mostrarMensagem("Erro: " + (erro.erro || "Falha ao salvar"), "danger");
-      return;
+    const dados = await resposta.json();
+    console.log("Resposta do PUT:", dados);
+
+    if (resposta.ok) {
+        alert("Atualizado com sucesso!");
+        buscarPorNome();
+        document.getElementById("formEdicao").style.display = "none";
+    } else {
+        alert("Erro ao atualizar: " + JSON.stringify(dados));
     }
-
-    mostrarMensagem("Adolescente salvo com sucesso!");
-    
-    // limpa formulário
-    document.querySelectorAll("input").forEach(i => i.value = "");
-
-  } catch (e) {
-    mostrarMensagem("Erro ao conectar com o servidor.", "danger");
-  }
 }
 </script>
-
-</body>
-</html>
