@@ -6,10 +6,7 @@
   <title>Cadastro de Adolescentes</title>
 
   <!-- BOOTSTRAP -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
     body { background: #f5f5f5; }
@@ -21,9 +18,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     #mensagem { display: none; }
-    .logo-img {
-    filter: invert(1);
-    }
+    .logo-img { filter: invert(1); }
   </style>
 
 </head>
@@ -106,7 +101,6 @@
   <div id="lista" class="container-box mt-3"></div>
 </div>
 
-
 <!-- MODAL EDIÇÃO -->
 <div class="modal fade" id="modalEditar" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -175,22 +169,19 @@
   </div>
 </div>
 
-
 <!-- BOOTSTRAP JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-/* ===============================
-      CONFIGURAÇÃO
-=============================== */
 
-// 🔥 ALTERE A SUA URL DA API AQUI:
+// ================================
+// CONFIGURAÇÃO
+// ================================
 const API_BASE = "https://cadastro-adolescentes.onrender.com";
 
-/* ===============================
-      FUNÇÕES DE FORMATAÇÃO
-=============================== */
-
+// ================================
+// MÁSCARA TELEFONE
+// ================================
 function mascaraContato(v) {
   v = v.replace(/\D/g, "");
   v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -198,50 +189,35 @@ function mascaraContato(v) {
   return v;
 }
 
-document.getElementById("contato").addEventListener("input", (e) => {
-  e.target.value = mascaraContato(e.target.value);
-});
+contato.addEventListener("input", e => e.target.value = mascaraContato(e.target.value));
+edit_contato.addEventListener("input", e => e.target.value = mascaraContato(e.target.value));
 
-document.getElementById("edit_contato").addEventListener("input", (e) => {
-  e.target.value = mascaraContato(e.target.value);
-});
-
-/* ===============================
-      BUSCAR TODOS
-=============================== */
+// ================================
+// LISTAR TODOS
+// ================================
 async function listarTodos() {
   try {
     const res = await fetch(`${API_BASE}/adolescentes`);
-    const dados = await res.json();
-    mostrarLista(dados);
+    mostrarLista(await res.json());
   } catch {
     erro("Erro ao carregar dados.");
   }
 }
 
-/* ===============================
-      BUSCAR POR NOME
-=============================== */
+// ================================
+// BUSCAR POR NOME (CORRIGIDO)
+// ================================
 async function buscar() {
-  const nome = document.getElementById("busca_nome").value;
+  const nome = busca_nome.value.trim();
 
-  if (!nome.trim()) {
-    listarTodos();
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/adolescentes/nome/${nome}`);
-    const dados = await res.json();
-    mostrarLista(dados);
-  } catch {
-    erro("Erro ao buscar dados.");
-  }
+  const res = await fetch(`${API_BASE}/adolescentes?nome=${nome}`);
+  const dados = await res.json();
+  mostrarLista(dados);
 }
 
-/* ===============================
-      SALVAR NOVO
-=============================== */
+// ================================
+// SALVAR NOVO (CORRIGIDO)
+// ================================
 async function salvarAdolescente() {
   const payload = {
     nome: nome.value,
@@ -257,7 +233,7 @@ async function salvarAdolescente() {
   };
 
   try {
-    await fetch(`${API_BASE}/adolescentes/create`, {
+    await fetch(`${API_BASE}/adolescentes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -269,9 +245,9 @@ async function salvarAdolescente() {
   }
 }
 
-/* ===============================
-      CARREGAR NO MODAL
-=============================== */
+// ================================
+// EDITAR (GET POR ID)
+// ================================
 function editar(id) {
   fetch(`${API_BASE}/adolescentes/${id}`)
     .then(r => r.json())
@@ -291,9 +267,9 @@ function editar(id) {
     });
 }
 
-/* ===============================
-      SALVAR EDIÇÃO
-=============================== */
+// ================================
+// SALVAR EDIÇÃO (CORRIGIDO)
+// ================================
 async function salvarEdicao() {
   const id = edit_id.value;
 
@@ -310,7 +286,7 @@ async function salvarEdicao() {
     }
   };
 
-  await fetch(`${API_BASE}/adolescentes/update/${id}`, {
+  await fetch(`${API_BASE}/adolescentes/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -319,20 +295,20 @@ async function salvarEdicao() {
   listarTodos();
 }
 
-/* ===============================
-      DELETAR
-=============================== */
+// ================================
+// DELETAR (CORRIGIDO)
+// ================================
 async function deletar(id) {
   if (!confirm("Tem certeza que deseja excluir?")) return;
 
-  await fetch(`${API_BASE}/adolescentes/delete/${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE}/adolescentes/${id}`, { method: "DELETE" });
 
   listarTodos();
 }
 
-/* ===============================
-      IMPRESSÃO
-=============================== */
+// ================================
+// IMPRESSÃO
+// ================================
 function imprimirRegistro(d) {
   const html = `
   <!doctype html>
@@ -347,19 +323,17 @@ function imprimirRegistro(d) {
   </head>
   <body>
 
-    <img src="/Images/logo_adolescentes.PNG" class="logo" />
+    <img src="Images/logo_adolescentes.png" class="logo" />
 
     <div class="container">
       <h3 class="text-center">Ficha do Adolescente</h3>
       <hr>
-
       <p><strong>Nome:</strong> ${d.nome}</p>
       <p><strong>Pai:</strong> ${d.nome_pai}</p>
       <p><strong>Mãe:</strong> ${d.nome_mae}</p>
       <p><strong>Contato:</strong> ${d.contato}</p>
       <p><strong>Data de nascimento:</strong> ${d.data_nasc}</p>
       <p><strong>Endereço:</strong> ${d.endereco.rua}, ${d.endereco.numero} - ${d.endereco.bairro}</p>
-
     </div>
 
     <script>
@@ -368,7 +342,6 @@ function imprimirRegistro(d) {
         window.onafterprint = function() { window.close(); };
       }
     <\/script>
-
   </body>
   </html>
   `;
@@ -378,9 +351,9 @@ function imprimirRegistro(d) {
   w.document.close();
 }
 
-/* ===============================
-      LISTA
-=============================== */
+// ================================
+// LISTA
+// ================================
 function mostrarLista(lista) {
   let html = `
     <table class="table table-striped">
@@ -410,15 +383,10 @@ function mostrarLista(lista) {
 
   html += "</tbody></table>";
 
-  listaDiv = document.getElementById("lista");
-  listaDiv.innerHTML = html;
+  document.getElementById("lista").innerHTML = html;
 }
 
-function erro(msg) {
-  mensagem.style.display = "block";
-  mensagem.innerText = msg;
-}
-
+// ================================
 document.addEventListener("DOMContentLoaded", listarTodos);
 </script>
 
