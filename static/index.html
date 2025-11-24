@@ -18,8 +18,10 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .logo-img { width: 160px; display:block; margin:10px auto 20px; }
+    #mensagem { display:none; }
   </style>
 </head>
+
 <body>
 
 <div class="container mt-4">
@@ -29,80 +31,121 @@
 
   <h2 class="text-center mb-3">Cadastro de Adolescentes</h2>
 
-  <!-- FORMULÁRIO (ainda sem JS) -->
+  <!-- MENSAGEM -->
+  <div id="mensagem" class="alert"></div>
+
+  <!-- FORMULÁRIO -->
   <div class="container-box">
     <div class="row g-3">
+
       <div class="col-md-8">
         <label>Nome completo</label>
-        <input class="form-control" />
+        <input id="nome" class="form-control" />
       </div>
 
       <div class="col-md-4">
         <label>Contato</label>
-        <input class="form-control" />
+        <input id="contato" class="form-control" placeholder="(99) 99999-9999" />
       </div>
 
       <div class="col-md-6">
         <label>Nome do Pai</label>
-        <input class="form-control" />
+        <input id="nome_pai" class="form-control" />
       </div>
 
       <div class="col-md-6">
         <label>Nome da Mãe</label>
-        <input class="form-control" />
+        <input id="nome_mae" class="form-control" />
       </div>
 
       <div class="col-md-4">
         <label>Data de Nascimento</label>
-        <input type="date" class="form-control" />
+        <input id="data_nasc" type="date" class="form-control" />
       </div>
 
       <h5 class="mt-3">Endereço</h5>
 
       <div class="col-md-6">
         <label>Rua</label>
-        <input class="form-control" />
+        <input id="rua" class="form-control" />
       </div>
 
       <div class="col-md-3">
         <label>Número</label>
-        <input class="form-control" />
+        <input id="numero" class="form-control" />
       </div>
 
       <div class="col-md-3">
         <label>Bairro</label>
-        <input class="form-control" />
+        <input id="bairro" class="form-control" />
       </div>
 
       <div class="col-12 mt-3">
-        <button class="btn btn-primary w-100">Salvar</button>
+        <button onclick="salvarAdolescente()" class="btn btn-primary w-100">Salvar</button>
       </div>
+
     </div>
-  </div>
-
-  <!-- BUSCA -->
-  <div class="container-box mt-3">
-    <div class="row g-2">
-      <div class="col-md-8">
-        <input class="form-control" placeholder="Buscar por nome..." />
-      </div>
-
-      <div class="col-md-2">
-        <button class="btn btn-outline-primary w-100">Pesquisar</button>
-      </div>
-
-      <div class="col-md-2">
-        <button class="btn btn-secondary w-100">Listar Todos</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ÁREA DA LISTA (ainda vazia) -->
-  <div id="lista" class="container-box mt-3">
-    <p class="text-center">Nenhum dado carregado ainda.</p>
   </div>
 
 </div>
+
+<script>
+/* =========================================
+        CONFIGURAÇÃO
+========================================= */
+const API_BASE = "https://cadastro-adolescentes.onrender.com";
+
+/* =========================================
+       MENSAGEM DE FEEDBACK
+========================================= */
+function mostrarMensagem(texto, tipo="success") {
+  const msg = document.getElementById("mensagem");
+  msg.style.display = "block";
+  msg.className = "alert alert-" + tipo;
+  msg.innerText = texto;
+
+  setTimeout(() => msg.style.display = "none", 3000);
+}
+
+/* =========================================
+       SALVAR NOVO ADOLESCENTE (POST)
+========================================= */
+async function salvarAdolescente() {
+
+  const payload = {
+    nome: nome.value.trim(),
+    contato: contato.value.trim(),
+    nome_pai: nome_pai.value.trim(),
+    nome_mae: nome_mae.value.trim(),
+    data_nasc: data_nasc.value,
+    rua: rua.value.trim(),
+    numero: numero.value.trim(),
+    bairro: bairro.value.trim()
+  };
+
+  try {
+    const response = await fetch(`${API_BASE}/adolescentes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const erro = await response.json();
+      mostrarMensagem("Erro: " + (erro.erro || "Falha ao salvar"), "danger");
+      return;
+    }
+
+    mostrarMensagem("Adolescente salvo com sucesso!");
+    
+    // limpa formulário
+    document.querySelectorAll("input").forEach(i => i.value = "");
+
+  } catch (e) {
+    mostrarMensagem("Erro ao conectar com o servidor.", "danger");
+  }
+}
+</script>
 
 </body>
 </html>
