@@ -1,11 +1,12 @@
+from flask import Blueprint, request, jsonify
 from db_config import connect_db
-from flask import jsonify, request, Blueprint
 
 adolescente_bp = Blueprint("adolescente", __name__)
 
-# ---------------------------
-# GET TODOS
-# ---------------------------
+
+# =====================================================
+# GET TODOS + BUSCA POR NOME
+# =====================================================
 @adolescente_bp.route("/adolescentes", methods=["GET"])
 def get_all():
     try:
@@ -14,25 +15,24 @@ def get_all():
         supabase = connect_db()
         query = supabase.table("adolescentes").select("*")
 
-        # GET por nome via querystring
         if nome:
             query = query.ilike("nome", f"%{nome}%")
 
-        data = query.execute().data
-        return jsonify(data), 200
+        result = query.execute().data
+        return jsonify(result), 200
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
 
-# ---------------------------
+# =====================================================
 # GET POR ID
-# ---------------------------
+# =====================================================
 @adolescente_bp.route("/adolescentes/<int:id>", methods=["GET"])
 def get_by_id(id):
     try:
         supabase = connect_db()
-        response = (
+        result = (
             supabase.table("adolescentes")
             .select("*")
             .eq("id", id)
@@ -40,70 +40,102 @@ def get_by_id(id):
             .execute()
         )
 
-        return jsonify(response.data), 200
+        return jsonify(result.data), 200
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
 
-# ---------------------------
-# CREATE
-# ---------------------------
+# =====================================================
+# CRIAR ADOLESCENTE
+# =====================================================
 @adolescente_bp.route("/adolescentes", methods=["POST"])
-def create_adolescente():
+def criar_adolescente():
     try:
         data = request.json
-
         supabase = connect_db()
-        response = supabase.table("adolescentes").insert(data).execute()
 
-        return jsonify(response.data), 201
+        # Endereço é um TYPE
+        endereco = {
+            "rua": data.get("rua"),
+            "numero": data.get("numero"),
+            "bairro": data.get("bairro"),
+        }
+
+        payload = {
+            "nome": data.get("nome"),
+            "idade": data.get("idade"),
+            "nome_pai": data.get("nome_pai"),
+            "nome_mae": data.get("nome_mae"),
+            "contato": data.get("contato"),
+            "endereco": endereco,
+        }
+
+        resp = supabase.table("adolescentes").insert(payload).execute()
+        return jsonify(resp.data), 201
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
 
-# ---------------------------
-# UPDATE (PUT)
-# ---------------------------
+# =====================================================
+# ATUALIZAR ADOLESCENTE
+# =====================================================
 @adolescente_bp.route("/adolescentes/<int:id>", methods=["PUT"])
-def update_adolescente(id):
+def atualizar_adolescente(id):
     try:
         data = request.json
-
         supabase = connect_db()
-        response = (
+
+        endereco = {
+            "rua": data.get("rua"),
+            "numero": data.get("numero"),
+            "bairro": data.get("bairro"),
+        }
+
+        payload = {
+            "nome": data.get("nome"),
+            "idade": data.get("idade"),
+            "nome_pai": data.get("nome_pai"),
+            "nome_mae": data.get("nome_mae"),
+            "contato": data.get("contato"),
+            "endereco": endereco,
+        }
+
+        resp = (
             supabase.table("adolescentes")
-            .update(data)
+            .update(payload)
             .eq("id", id)
             .execute()
         )
 
-        return jsonify(response.data), 200
+        return jsonify(resp.data), 200
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
+
+# =====================================================
+# DELETAR ADOLESCENTE
+# =====================================================
 @adolescente_bp.route("/adolescentes/<int:id>", methods=["DELETE"])
 def deletar_adolescente(id):
     try:
         supabase = connect_db()
 
-        # Verifica se existe antes de deletar
-        check = supabase.table("adolescentes").select("*").eq("id", id).execute()
-
-        if not check.data:
-            return jsonify({"erro": "Adolescente não encontrado"}), 404
-
-        # Deleta o registro
-        response = (
+        existe = (
             supabase.table("adolescentes")
-            .delete()
+            .select("id")
             .eq("id", id)
             .execute()
         )
 
-        return jsonify({"mensagem": "Adolescente deletado com sucesso!"}), 200
+        if not existe.data:
+            return jsonify({"erro": "Adolescente não encontrado"}), 404
+
+        supabase.table("adolescentes").delete().eq("id", id).execute()
+
+        return jsonify({"mensagem": "Registro deletado com sucesso"}), 200
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
