@@ -1,445 +1,423 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cadastro de Adolescentes</title>
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- BOOTSTRAP -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 
   <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { -webkit-print-color-adjust: exact; }
+    body { background: #f5f5f5; }
+    .container-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    #mensagem { display: none; }
   </style>
+
 </head>
-<body class="bg-light">
+<body>
 
-  <div class="container py-4">
+<div class="container mt-4">
+  <h2 class="text-center mb-3">Cadastro de Adolescentes</h2>
 
-    <h1 class="mb-4 text-center">Cadastro de Adolescentes</h1>
+  <!-- FORMULÁRIO -->
+  <div class="container-box">
+    <div class="row g-3">
 
-    <!-- Formulário de cadastro -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <form id="form-adolescente" class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">Nome</label>
-            <input id="nome" class="form-control" placeholder="Nome completo" required />
-          </div>
-
-          <div class="col-md-8">
-            <label class="form-label">Contato</label>
-            <input id="contato" class="form-control" placeholder="(99) 99999-9999" oninput="mascaraTelefone(this)" />
-            <div class="form-text">Digite apenas números — máscara será aplicada.</div>
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Nome do Pai</label>
-            <input id="nome_pai" class="form-control" placeholder="Nome do Pai" />
-          </div>
-
-          <div class="col-md-6">
-            <label class="form-label">Nome da Mãe</label>
-            <input id="nome_mae" class="form-control" placeholder="Nome da Mãe" />
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Data de Nascimento</label>
-            <input id="data_nasc" type="date" class="form-control" />
-          </div>
-
-          <div class="col-12"><h6 class="mt-2">Endereço</h6></div>
-
-          <div class="col-md-6">
-            <label class="form-label">Rua</label>
-            <input id="rua" class="form-control" placeholder="Rua" />
-          </div>
-
-          <div class="col-md-3">
-            <label class="form-label">Número</label>
-            <input id="numero" class="form-control" placeholder="Número" />
-          </div>
-
-          <div class="col-md-3">
-            <label class="form-label">Bairro</label>
-            <input id="bairro" class="form-control" placeholder="Bairro" />
-          </div>
-
-          <div class="col-12 d-grid">
-            <button type="submit" class="btn btn-primary">Salvar</button>
-          </div>
-        </form>
-        <div id="mensagem" class="mt-3"></div>
-      </div>
-    </div>
-
-    <!-- Busca e ações -->
-    <div class="row mb-3 no-print">
       <div class="col-md-8">
-        <input id="busca-nome" class="form-control" placeholder="Buscar por nome..." />
+        <label>Nome completo</label>
+        <input id="nome" class="form-control" />
       </div>
-      <div class="col-md-4 d-flex gap-2">
-        <button id="btn-pesquisar" class="btn btn-outline-primary flex-grow-1">Pesquisar</button>
-        <button id="btn-get" class="btn btn-secondary">Listar Todos</button>
+
+      <div class="col-md-4">
+        <label>Contato</label>
+        <input id="contato" class="form-control" placeholder="(99) 99999-9999" maxlength="15" />
       </div>
-    </div>
 
-    <!-- Lista -->
-    <div id="lista"></div>
+      <div class="col-md-6">
+        <label>Nome do Pai</label>
+        <input id="nome_pai" class="form-control" />
+      </div>
 
-  </div>
+      <div class="col-md-6">
+        <label>Nome da Mãe</label>
+        <input id="nome_mae" class="form-control" />
+      </div>
 
-  <!-- Modal edição -->
-  <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
+      <div class="col-md-4">
+        <label>Data de Nascimento</label>
+        <input id="data_nasc" type="date" class="form-control" />
+      </div>
 
-        <div class="modal-header bg-warning">
-          <h5 class="modal-title">Editar Adolescente</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+      <hr />
 
-        <div class="modal-body">
-          <form id="form-editar" class="row g-3">
-            <input type="hidden" id="edit-id">
+      <h5>Endereço</h5>
 
-            <div class="col-md-4">
-              <label class="form-label">Nome</label>
-              <input id="edit-nome" class="form-control" placeholder="Nome" />
-            </div>
+      <div class="col-md-6">
+        <label>Rua</label>
+        <input id="rua" class="form-control" />
+      </div>
 
-            <div class="col-md-8">
-              <label class="form-label">Contato</label>
-              <input id="edit-contato" class="form-control" placeholder="(99) 99999-9999" oninput="mascaraTelefone(this)" />
-              <div class="form-text">Digite apenas números — máscara será aplicada.</div>
-            </div>
+      <div class="col-md-3">
+        <label>Número</label>
+        <input id="numero" class="form-control" />
+      </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Nome do Pai</label>
-              <input id="edit-nome_pai" class="form-control" placeholder="Nome do Pai" />
-            </div>
+      <div class="col-md-3">
+        <label>Bairro</label>
+        <input id="bairro" class="form-control" />
+      </div>
 
-            <div class="col-md-6">
-              <label class="form-label">Nome da Mãe</label>
-              <input id="edit-nome_mae" class="form-control" placeholder="Nome da Mãe" />
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Data de Nascimento</label>
-              <input id="edit-data_nasc" type="date" class="form-control" />
-            </div>
-
-            <div class="col-12"><h6 class="mt-2">Endereço</h6></div>
-
-            <div class="col-md-6">
-              <label class="form-label">Rua</label>
-              <input id="edit-rua" class="form-control" placeholder="Rua" />
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Número</label>
-              <input id="edit-numero" class="form-control" placeholder="Número" />
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label">Bairro</label>
-              <input id="edit-bairro" class="form-control" placeholder="Bairro" />
-            </div>
-
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button id="btn-fechar-modal" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button id="btn-salvar-edit" class="btn btn-primary">Salvar Alterações</button>
-        </div>
-
+      <div class="col-12 mt-3">
+        <button onclick="salvarAdolescente()" class="btn btn-primary w-100">Salvar</button>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const API_BASE = "https://cadastro-adolescentes.onrender.com";
-    const el = id => document.getElementById(id);
+  <!-- BUSCA -->
+  <div class="container-box mt-3">
+    <div class="row g-2">
+      <div class="col-md-8">
+        <input id="busca_nome" class="form-control" placeholder="Buscar por nome..." />
+      </div>
+      <div class="col-md-2">
+        <button onclick="buscar()" class="btn btn-outline-primary w-100">Pesquisar</button>
+      </div>
+      <div class="col-md-2">
+        <button onclick="listarTodos()" class="btn btn-secondary w-100">Listar Todos</button>
+      </div>
+    </div>
+  </div>
 
-    function escapeHtml(str) {
-      return String(str || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+  <!-- LISTA -->
+  <div id="mensagem" class="alert alert-danger mt-3"></div>
+  <div id="lista" class="container-box mt-3"></div>
+</div>
 
-    function formatarDataBR(dataISO) {
-      if (!dataISO) return "-";
-      if (typeof dataISO === "string" && dataISO.includes("-")) {
-        const [ano, mes, dia] = dataISO.split("-");
-        return `${dia}/${mes}/${ano}`;
-      }
-      return String(dataISO);
-    }
 
-    function mascaraTelefone(campo) {
-      let v = campo.value.replace(/\D/g, "");
-      v = v.substring(0, 11);
-      if (v.length > 6) {
-        campo.value = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-      } else if (v.length > 2) {
-        campo.value = v.replace(/(\d{2})(\d{1,5})/, "($1) $2");
-      } else {
-        campo.value = v.replace(/(\d{0,2})/, "($1");
-      }
-    }
+<!-- MODAL EDIÇÃO -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
 
-    el("form-adolescente").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const payload = {
-        nome: el("nome").value.trim(),
-        nome_pai: el("nome_pai").value.trim(),
-        nome_mae: el("nome_mae").value.trim(),
-        contato: el("contato").value.replace(/\D/g, ""),
-        data_nasc: el("data_nasc").value || null,
-        endereco: {
-          rua: el("rua").value.trim(),
-          numero: el("numero").value.trim(),
-          bairro: el("bairro").value.trim(),
-        }
-      };
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Adolescente</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-      try {
-        const r = await fetch(API_BASE + "/adolescentes", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify(payload)
-        });
-        const j = await r.json().catch(() => ({}));
-        if (r.ok) {
-          el("mensagem").textContent = "Cadastrado com sucesso!";
-          el("mensagem").className = "text-success";
-          el("form-adolescente").reset();
-          listarTodos();
-        } else {
-          el("mensagem").textContent = "Erro: " + (j.erro || JSON.stringify(j));
-          el("mensagem").className = "text-danger";
-        }
-      } catch (err) {
-        el("mensagem").textContent = "Erro de conexão";
-        el("mensagem").className = "text-danger";
-      }
-    });
+      <div class="modal-body">
+        <input type="hidden" id="edit_id" />
 
-    async function buscar(url) {
-      try {
-        const r = await fetch(url);
-        if (!r.ok) throw new Error("Erro na requisição");
-        const data = await r.json();
-        renderLista(Array.isArray(data) ? data : (data ? [data] : []));
-      } catch (e) {
-        el("lista").innerHTML = '<div class="alert alert-danger">Erro ao buscar dados.</div>';
-      }
-    }
-
-    function listarTodos() {
-      buscar(API_BASE + "/adolescentes");
-    }
-
-    el("btn-get").addEventListener("click", listarTodos);
-
-    el("btn-pesquisar").addEventListener("click", () => {
-      const nome = el("busca-nome").value.trim();
-      if (!nome) {
-        alert("Digite um nome!");
-        return;
-      }
-      buscar(API_BASE + "/adolescentes?nome=" + encodeURIComponent(nome));
-    });
-
-    function renderLista(items) {
-      const lista = el("lista");
-      if (!items || items.length === 0) {
-        lista.innerHTML = '<div class="alert alert-warning">Nenhum registro encontrado.</div>';
-        return;
-      }
-
-      lista.innerHTML = "";
-      items.forEach(item => {
-        const idVal = item.id ?? item.ID ?? item.id_adolescente ?? null;
-
-        const card = document.createElement("div");
-        card.className = "card mb-2 p-3 shadow-sm";
-
-        const left = document.createElement("div");
-        left.innerHTML = `
-          <h5>${escapeHtml(item.nome || "")}</h5>
-          <div class="small text-muted">Pai: ${escapeHtml(item.nome_pai || "-")} | Mãe: ${escapeHtml(item.nome_mae || "-")}</div>
-          <div class="mt-2">${escapeHtml(item.endereco?.rua || "")}, ${escapeHtml(item.endereco?.numero || "")} - ${escapeHtml(item.endereco?.bairro || "")}</div>
-          <div class="small mt-1">Contato: ${formatarContatoExibicao(item.contato)} • Nasc: ${formatarDataBR(item.data_nasc)}</div>
-        `;
-
-        const right = document.createElement("div");
-        right.className = "d-flex flex-column gap-2";
-
-        const btnEditar = document.createElement("button");
-        btnEditar.className = "btn btn-sm btn-outline-primary";
-        btnEditar.textContent = "Editar";
-        btnEditar.addEventListener("click", () => abrirEdicao(idVal));
-
-        const btnExcluir = document.createElement("button");
-        btnExcluir.className = "btn btn-sm btn-outline-danger";
-        btnExcluir.textContent = "Excluir";
-        btnExcluir.addEventListener("click", () => excluir(idVal));
-
-        const btnImprimir = document.createElement("button");
-        btnImprimir.className = "btn btn-sm btn-outline-success";
-        btnImprimir.textContent = "Imprimir";
-        btnImprimir.addEventListener("click", () => imprimirRegistro(item));
-
-        right.append(btnEditar, btnExcluir, btnImprimir);
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "d-flex justify-content-between";
-        wrapper.append(left, right);
-
-        card.appendChild(wrapper);
-        lista.appendChild(card);
-      });
-    }
-
-    function formatarContatoExibicao(contato) {
-      if (!contato) return "-";
-      const apenasNums = String(contato).replace(/\D/g, "");
-      if (apenasNums.length === 11) {
-        return `(${apenasNums.slice(0,2)}) ${apenasNums.slice(2,7)}-${apenasNums.slice(7)}`;
-      }
-      if (apenasNums.length > 2 && apenasNums.length <= 6) {
-        return `(${apenasNums.slice(0,2)}) ${apenasNums.slice(2)}`;
-      }
-      if (apenasNums.length > 6 && apenasNums.length < 11) {
-        return `(${apenasNums.slice(0,2)}) ${apenasNums.slice(2,5)}-${apenasNums.slice(5)}`;
-      }
-      return contato;
-    }
-
-    function imprimirRegistro(d) {
-      const nome = escapeHtml(d.nome || "");
-      const pai = escapeHtml(d.nome_pai || "-");
-      const mae = escapeHtml(d.nome_mae || "-");
-      const contato = escapeHtml(formatarContatoExibicao(d.contato));
-      const nasc = escapeHtml(formatarDataBR(d.data_nasc));
-      const rua = escapeHtml(d.endereco?.rua || "");
-      const numero = escapeHtml(d.endereco?.numero || "");
-      const bairro = escapeHtml(d.endereco?.bairro || "");
-
-      const html = `
-        <!doctype html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Ficha - ${nome}</title>
-          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-          <style> body{padding:20px;} .no-print{display:none;} </style>
-        </head>
-        <body>
-          <div class="container">
-            <h3>Ficha do Adolescente</h3>
-            <hr>
-            <p><strong>Nome:</strong> ${nome}</p>
-            <p><strong>Pai:</strong> ${pai}</p>
-            <p><strong>Mãe:</strong> ${mae}</p>
-            <p><strong>Contato:</strong> ${contato}</p>
-            <p><strong>Data de Nasc.:</strong> ${nasc}</p>
-            <p><strong>Endereço:</strong><br>${rua}, ${numero} - ${bairro}</p>
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label>Nome completo</label>
+            <input id="edit_nome" class="form-control" />
           </div>
-          <script>
-            window.onload = function() { window.print(); window.onafterprint = function(){ window.close(); }; };
-          <\/script>
-        </body>
-        </html>
-      `;
 
-      const w = window.open("", "_blank");
-      w.document.open();
-      w.document.write(html);
-      w.document.close();
+          <div class="col-md-4">
+            <label>Contato</label>
+            <input id="edit_contato" class="form-control" maxlength="15" />
+          </div>
+
+          <div class="col-md-6">
+            <label>Nome do Pai</label>
+            <input id="edit_nome_pai" class="form-control" />
+          </div>
+
+          <div class="col-md-6">
+            <label>Nome da Mãe</label>
+            <input id="edit_nome_mae" class="form-control" />
+          </div>
+
+          <div class="col-md-4">
+            <label>Data de Nascimento</label>
+            <input id="edit_data_nasc" class="form-control" type="date" />
+          </div>
+
+          <hr />
+
+          <h5>Endereço</h5>
+
+          <div class="col-md-6">
+            <label>Rua</label>
+            <input id="edit_rua" class="form-control" />
+          </div>
+
+          <div class="col-md-3">
+            <label>Número</label>
+            <input id="edit_numero" class="form-control" />
+          </div>
+
+          <div class="col-md-3">
+            <label>Bairro</label>
+            <input id="edit_bairro" class="form-control" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button onclick="salvarEdicao()" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- BOOTSTRAP JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ===============================
+      CONFIGURAÇÃO
+=============================== */
+
+// 🔥 ALTERE A SUA URL DA API AQUI:
+const API_BASE = "https://cadastro-adolescentes.onrender.com";
+
+/* ===============================
+      FUNÇÕES DE FORMATAÇÃO
+=============================== */
+
+function mascaraContato(v) {
+  v = v.replace(/\D/g, "");
+  v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+  v = v.replace(/(\d{5})(\d)/, "$1-$2");
+  return v;
+}
+
+document.getElementById("contato").addEventListener("input", (e) => {
+  e.target.value = mascaraContato(e.target.value);
+});
+
+document.getElementById("edit_contato").addEventListener("input", (e) => {
+  e.target.value = mascaraContato(e.target.value);
+});
+
+/* ===============================
+      BUSCAR TODOS
+=============================== */
+async function listarTodos() {
+  try {
+    const res = await fetch(`${API_BASE}/adolescentes`);
+    const dados = await res.json();
+    mostrarLista(dados);
+  } catch {
+    erro("Erro ao carregar dados.");
+  }
+}
+
+/* ===============================
+      BUSCAR POR NOME
+=============================== */
+async function buscar() {
+  const nome = document.getElementById("busca_nome").value;
+
+  if (!nome.trim()) {
+    listarTodos();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/adolescentes/nome/${nome}`);
+    const dados = await res.json();
+    mostrarLista(dados);
+  } catch {
+    erro("Erro ao buscar dados.");
+  }
+}
+
+/* ===============================
+      SALVAR NOVO
+=============================== */
+async function salvarAdolescente() {
+  const payload = {
+    nome: nome.value,
+    contato: contato.value,
+    nome_pai: nome_pai.value,
+    nome_mae: nome_mae.value,
+    data_nasc: data_nasc.value,
+    endereco: {
+      rua: rua.value,
+      numero: numero.value,
+      bairro: bairro.value
     }
+  };
 
-    async function abrirEdicao(id) {
-      if (id == null) { alert("ID inválido"); return; }
-      try {
-        const r = await fetch(API_BASE + "/adolescentes/" + encodeURIComponent(id));
-        if (!r.ok) { alert("Registro não encontrado"); return; }
-        const i = await r.json();
-
-        el("edit-id").value = i.id ?? i.ID ?? i.id_adolescente ?? "";
-        el("edit-nome").value = i.nome ?? "";
-        el("edit-nome_pai").value = i.nome_pai ?? "";
-        el("edit-nome_mae").value = i.nome_mae ?? "";
-        el("edit-contato").value = formatarContatoExibicao(i.contato);
-        el("edit-data_nasc").value = i.data_nasc ?? "";
-        el("edit-rua").value = i.endereco?.rua ?? "";
-        el("edit-numero").value = i.endereco?.numero ?? "";
-        el("edit-bairro").value = i.endereco?.bairro ?? "";
-
-        new bootstrap.Modal(document.getElementById("modalEditar")).show();
-      } catch(e) {
-        alert("Erro ao carregar registro para edição");
-      }
-    }
-
-    document.getElementById("btn-salvar-edit").addEventListener("click", async () => {
-      const id = el("edit-id").value;
-      if (!id) { alert("ID ausente"); return; }
-
-      const payload = {
-        nome: el("edit-nome").value.trim(),
-        nome_pai: el("edit-nome_pai").value.trim(),
-        nome_mae: el("edit-nome_mae").value.trim(),
-        contato: el("edit-contato").value.replace(/\D/g, ""),
-        data_nasc: el("edit-data_nasc").value || null,
-        endereco: {
-          rua: el("edit-rua").value.trim(),
-          numero: el("edit-numero").value.trim(),
-          bairro: el("edit-bairro").value.trim()
-        }
-      };
-
-      try {
-        const r = await fetch(API_BASE + "/adolescentes/" + encodeURIComponent(id), {
-          method: "PUT",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify(payload)
-        });
-        if (!r.ok) {
-          const j = await r.json().catch(() => ({}));
-          alert("Erro ao salvar: " + (j.erro || r.status));
-          return;
-        }
-        bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
-        listarTodos();
-      } catch(e) {
-        alert("Erro de conexão");
-      }
+  try {
+    await fetch(`${API_BASE}/adolescentes/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
-
-    async function excluir(id) {
-      if (!confirm("Confirmar exclusão?")) return;
-      try {
-        const r = await fetch(API_BASE + "/adolescentes/" + encodeURIComponent(id), {
-          method: "DELETE"
-        });
-        if (!r.ok) throw new Error();
-        listarTodos();
-      } catch(e) {
-        alert("Erro ao excluir");
-      }
-    }
 
     listarTodos();
-  </script>
+  } catch {
+    erro("Erro ao salvar.");
+  }
+}
+
+/* ===============================
+      CARREGAR NO MODAL
+=============================== */
+function editar(id) {
+  fetch(`${API_BASE}/adolescentes/${id}`)
+    .then(r => r.json())
+    .then(d => {
+      edit_id.value = id;
+      edit_nome.value = d.nome;
+      edit_contato.value = mascaraContato(d.contato);
+      edit_nome_pai.value = d.nome_pai;
+      edit_nome_mae.value = d.nome_mae;
+      edit_data_nasc.value = d.data_nasc;
+
+      edit_rua.value = d.endereco?.rua;
+      edit_numero.value = d.endereco?.numero;
+      edit_bairro.value = d.endereco?.bairro;
+
+      new bootstrap.Modal(modalEditar).show();
+    });
+}
+
+/* ===============================
+      SALVAR EDIÇÃO
+=============================== */
+async function salvarEdicao() {
+  const id = edit_id.value;
+
+  const payload = {
+    nome: edit_nome.value,
+    contato: edit_contato.value,
+    nome_pai: edit_nome_pai.value,
+    nome_mae: edit_nome_mae.value,
+    data_nasc: edit_data_nasc.value,
+    endereco: {
+      rua: edit_rua.value,
+      numero: edit_numero.value,
+      bairro: edit_bairro.value
+    }
+  };
+
+  await fetch(`${API_BASE}/adolescentes/update/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  listarTodos();
+}
+
+/* ===============================
+      DELETAR
+=============================== */
+async function deletar(id) {
+  if (!confirm("Tem certeza que deseja excluir?")) return;
+
+  await fetch(`${API_BASE}/adolescentes/delete/${id}`, { method: "DELETE" });
+
+  listarTodos();
+}
+
+/* ===============================
+      IMPRESSÃO
+=============================== */
+function imprimirRegistro(d) {
+  const html = `
+  <!doctype html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>Ficha</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      .logo { width: 180px; margin: 15px auto; display: block; }
+    </style>
+  </head>
+  <body>
+
+    <img src="/Images/logo_adolescentes" class="logo" />
+
+    <div class="container">
+      <h3 class="text-center">Ficha do Adolescente</h3>
+      <hr>
+
+      <p><strong>Nome:</strong> ${d.nome}</p>
+      <p><strong>Pai:</strong> ${d.nome_pai}</p>
+      <p><strong>Mãe:</strong> ${d.nome_mae}</p>
+      <p><strong>Contato:</strong> ${d.contato}</p>
+      <p><strong>Data de nascimento:</strong> ${d.data_nasc}</p>
+      <p><strong>Endereço:</strong> ${d.endereco.rua}, ${d.endereco.numero} - ${d.endereco.bairro}</p>
+
+    </div>
+
+    <script>
+      window.onload = function() {
+        window.print();
+        window.onafterprint = function() { window.close(); };
+      }
+    <\/script>
+
+  </body>
+  </html>
+  `;
+
+  const w = window.open("", "_blank");
+  w.document.write(html);
+  w.document.close();
+}
+
+/* ===============================
+      LISTA
+=============================== */
+function mostrarLista(lista) {
+  let html = `
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Contato</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  lista.forEach(d => {
+    html += `
+      <tr>
+        <td>${d.nome}</td>
+        <td>${d.contato}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" onclick="editar('${d.id}')">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="deletar('${d.id}')">Excluir</button>
+          <button class="btn btn-sm btn-primary" onclick='imprimirRegistro(${JSON.stringify(d)})'>Imprimir</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += "</tbody></table>";
+
+  listaDiv = document.getElementById("lista");
+  listaDiv.innerHTML = html;
+}
+
+function erro(msg) {
+  mensagem.style.display = "block";
+  mensagem.innerText = msg;
+}
+
+document.addEventListener("DOMContentLoaded", listarTodos);
+</script>
+
 </body>
 </html>
