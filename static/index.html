@@ -6,7 +6,10 @@
   <title>Cadastro de Adolescentes</title>
 
   <!-- BOOTSTRAP -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 
   <style>
     body { background: #f5f5f5; }
@@ -18,10 +21,12 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     #mensagem { display: none; }
-    .logo-img { filter: invert(1); }
+    .logo-img {
+      filter: invert(1);
+    }
   </style>
-
 </head>
+
 <body>
 
 <div class="container mt-4">
@@ -78,6 +83,7 @@
       <div class="col-12 mt-3">
         <button onclick="salvarAdolescente()" class="btn btn-primary w-100">Salvar</button>
       </div>
+
     </div>
   </div>
 
@@ -101,6 +107,7 @@
   <div id="lista" class="container-box mt-3"></div>
 </div>
 
+
 <!-- MODAL EDIÇÃO -->
 <div class="modal fade" id="modalEditar" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -115,6 +122,7 @@
         <input type="hidden" id="edit_id" />
 
         <div class="row g-3">
+
           <div class="col-md-8">
             <label>Nome completo</label>
             <input id="edit_nome" class="form-control" />
@@ -140,8 +148,6 @@
             <input id="edit_data_nasc" class="form-control" type="date" />
           </div>
 
-          <hr />
-
           <h5>Endereço</h5>
 
           <div class="col-md-6">
@@ -158,6 +164,7 @@
             <label>Bairro</label>
             <input id="edit_bairro" class="form-control" />
           </div>
+
         </div>
       </div>
 
@@ -169,19 +176,21 @@
   </div>
 </div>
 
+
 <!-- BOOTSTRAP JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+/* ===============================
+      CONFIGURAÇÃO
+=============================== */
 
-// ================================
-// CONFIGURAÇÃO
-// ================================
 const API_BASE = "https://cadastro-adolescentes.onrender.com";
 
-// ================================
-// MÁSCARA TELEFONE
-// ================================
+/* ===============================
+    FORMATAÇÃO DO CONTATO
+=============================== */
+
 function mascaraContato(v) {
   v = v.replace(/\D/g, "");
   v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
@@ -192,32 +201,39 @@ function mascaraContato(v) {
 contato.addEventListener("input", e => e.target.value = mascaraContato(e.target.value));
 edit_contato.addEventListener("input", e => e.target.value = mascaraContato(e.target.value));
 
-// ================================
-// LISTAR TODOS
-// ================================
+/* ===============================
+      LISTAR TODOS
+=============================== */
 async function listarTodos() {
   try {
     const res = await fetch(`${API_BASE}/adolescentes`);
-    mostrarLista(await res.json());
+    const dados = await res.json();
+    mostrarLista(dados);
   } catch {
     erro("Erro ao carregar dados.");
   }
 }
 
-// ================================
-// BUSCAR POR NOME (CORRIGIDO)
-// ================================
+/* ===============================
+      BUSCAR POR NOME
+=============================== */
 async function buscar() {
   const nome = busca_nome.value.trim();
 
-  const res = await fetch(`${API_BASE}/adolescentes?nome=${nome}`);
-  const dados = await res.json();
-  mostrarLista(dados);
+  if (!nome) return listarTodos();
+
+  try {
+    const res = await fetch(`${API_BASE}/adolescentes/nome/${nome}`);
+    const dados = await res.json();
+    mostrarLista(dados);
+  } catch {
+    erro("Erro ao buscar.");
+  }
 }
 
-// ================================
-// SALVAR NOVO (CORRIGIDO)
-// ================================
+/* ===============================
+      SALVAR NOVO
+=============================== */
 async function salvarAdolescente() {
   const payload = {
     nome: nome.value,
@@ -225,11 +241,9 @@ async function salvarAdolescente() {
     nome_pai: nome_pai.value,
     nome_mae: nome_mae.value,
     data_nasc: data_nasc.value,
-    endereco: {
-      rua: rua.value,
-      numero: numero.value,
-      bairro: bairro.value
-    }
+    rua: rua.value,
+    numero: numero.value,
+    bairro: bairro.value
   };
 
   try {
@@ -245,31 +259,31 @@ async function salvarAdolescente() {
   }
 }
 
-// ================================
-// EDITAR (GET POR ID)
-// ================================
+/* ===============================
+      CARREGAR MODAL
+=============================== */
 function editar(id) {
   fetch(`${API_BASE}/adolescentes/${id}`)
     .then(r => r.json())
     .then(d => {
-      edit_id.value = id;
+      edit_id.value = d.id;
       edit_nome.value = d.nome;
       edit_contato.value = mascaraContato(d.contato);
       edit_nome_pai.value = d.nome_pai;
       edit_nome_mae.value = d.nome_mae;
       edit_data_nasc.value = d.data_nasc;
 
-      edit_rua.value = d.endereco?.rua;
-      edit_numero.value = d.endereco?.numero;
-      edit_bairro.value = d.endereco?.bairro;
+      edit_rua.value = d.rua;
+      edit_numero.value = d.numero;
+      edit_bairro.value = d.bairro;
 
       new bootstrap.Modal(modalEditar).show();
     });
 }
 
-// ================================
-// SALVAR EDIÇÃO (CORRIGIDO)
-// ================================
+/* ===============================
+      SALVAR EDIÇÃO
+=============================== */
 async function salvarEdicao() {
   const id = edit_id.value;
 
@@ -279,11 +293,9 @@ async function salvarEdicao() {
     nome_pai: edit_nome_pai.value,
     nome_mae: edit_nome_mae.value,
     data_nasc: edit_data_nasc.value,
-    endereco: {
-      rua: edit_rua.value,
-      numero: edit_numero.value,
-      bairro: edit_bairro.value
-    }
+    rua: edit_rua.value,
+    numero: edit_numero.value,
+    bairro: edit_bairro.value
   };
 
   await fetch(`${API_BASE}/adolescentes/${id}`, {
@@ -295,20 +307,22 @@ async function salvarEdicao() {
   listarTodos();
 }
 
-// ================================
-// DELETAR (CORRIGIDO)
-// ================================
+/* ===============================
+      DELETAR
+=============================== */
 async function deletar(id) {
   if (!confirm("Tem certeza que deseja excluir?")) return;
 
-  await fetch(`${API_BASE}/adolescentes/${id}`, { method: "DELETE" });
+  await fetch(`${API_BASE}/adolescentes/${id}`, {
+    method: "DELETE"
+  });
 
   listarTodos();
 }
 
-// ================================
-// IMPRESSÃO
-// ================================
+/* ===============================
+      IMPRESSÃO
+=============================== */
 function imprimirRegistro(d) {
   const html = `
   <!doctype html>
@@ -323,17 +337,19 @@ function imprimirRegistro(d) {
   </head>
   <body>
 
-    <img src="Images/logo_adolescentes.png" class="logo" />
+    <img src="Images/logo_adolescentes.PNG" class="logo" />
 
     <div class="container">
       <h3 class="text-center">Ficha do Adolescente</h3>
       <hr>
+
       <p><strong>Nome:</strong> ${d.nome}</p>
       <p><strong>Pai:</strong> ${d.nome_pai}</p>
       <p><strong>Mãe:</strong> ${d.nome_mae}</p>
       <p><strong>Contato:</strong> ${d.contato}</p>
       <p><strong>Data de nascimento:</strong> ${d.data_nasc}</p>
-      <p><strong>Endereço:</strong> ${d.endereco.rua}, ${d.endereco.numero} - ${d.endereco.bairro}</p>
+      <p><strong>Endereço:</strong> ${d.rua}, ${d.numero} - ${d.bairro}</p>
+
     </div>
 
     <script>
@@ -342,6 +358,7 @@ function imprimirRegistro(d) {
         window.onafterprint = function() { window.close(); };
       }
     <\/script>
+
   </body>
   </html>
   `;
@@ -351,9 +368,9 @@ function imprimirRegistro(d) {
   w.document.close();
 }
 
-// ================================
-// LISTA
-// ================================
+/* ===============================
+      EXIBIR LISTA
+=============================== */
 function mostrarLista(lista) {
   let html = `
     <table class="table table-striped">
@@ -382,11 +399,14 @@ function mostrarLista(lista) {
   });
 
   html += "</tbody></table>";
-
-  document.getElementById("lista").innerHTML = html;
+  listaDiv.innerHTML = html;
 }
 
-// ================================
+function erro(msg) {
+  mensagem.style.display = "block";
+  mensagem.innerText = msg;
+}
+
 document.addEventListener("DOMContentLoaded", listarTodos);
 </script>
 
