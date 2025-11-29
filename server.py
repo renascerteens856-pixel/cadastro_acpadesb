@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from adolescentes import adolescentes_bp
+from blueprints.adolescentes import adolescentes_bp
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
