@@ -1,18 +1,20 @@
-from flask import Flask, send_from_directory
+from flask import Flask
 from flask_cors import CORS
-from adolescente import adolescente_bp
-import os
+from blueprints.adolescentes import adolescentes_bp  # importa o blueprint
 
-app = Flask(__name__,   
-static_url_path='', 
-            static_folder='static')
-app.register_blueprint(adolescente_bp)
+app = Flask(__name__)
+
+# Libera acesso do front-end ao backend
 CORS(app)
 
+# Registra o Blueprint na rota /adolescentes
+app.register_blueprint(adolescentes_bp, url_prefix="/adolescentes")
 
-@app.route("/")
+
+@app.get("/")
 def home():
-    return send_from_directory(os.path.join(app.root_path,'static'), 'index.html')
+    return {"status": "Servidor rodando!", "versao": "1.0"}
+
 
 if __name__ == "__main__":
-    app.run()       
+    app.run(debug=True)
