@@ -1,348 +1,397 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8" />
     <title>Cadastro de Adolescentes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background: #eef1f5;
-        }
-
-        .card {
-            border-radius: 14px;
-        }
-
-        .table thead {
-            background: #0d6efd;
-            color: white;
-        }
-
-        .modal-header {
-            background: #0d6efd;
-            color: white;
-        }
-
-        .pointer {
-            cursor: pointer;
-        }
+        body { background: #f1f5f9; }
+        .card { border-radius: 12px; }
+        .table thead { background: #0d6efd; color: #fff; }
+        .modal-header { background: #0d6efd; color: #fff; }
+        .addr-small { font-size: 0.95rem; color: #555; }
+        .nowrap { white-space: nowrap; }
     </style>
 </head>
-
 <body>
+<div class="container py-4">
 
-    <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-people-fill me-2"></i>Cadastro de Adolescentes</h2>
+        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+            <i class="bi bi-plus-circle"></i> Novo
+        </button>
+    </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-people-fill"></i> Cadastro de Adolescentes</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastro">
-                <i class="bi bi-plus-circle"></i> Novo Cadastro
-            </button>
+    <!-- Busca -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <input id="buscarNome" class="form-control form-control-lg" placeholder="Buscar por nome..." />
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-outline-secondary" onclick="listarTodos()"><i class="bi bi-arrow-clockwise"></i> Atualizar</button>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- Busca -->
-        <div class="mb-3">
-            <input id="buscarNome" type="text" class="form-control" placeholder="Buscar por nome...">
-        </div>
-
-        <!-- Tabela -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <table class="table table-hover table-bordered">
+    <!-- Tabela -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Contato</th>
                             <th>Endereço</th>
-                            <th>Nascimento</th>
-                            <th width="120">Ações</th>
+                            <th class="nowrap">Data Nasc.</th>
+                            <th class="text-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="listaTabela"></tbody>
+                    <tbody id="listaTabela">
+                        <!-- preenchido por JS -->
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
+</div>
 
-    <!-- MODAL CADASTRO -->
-    <div class="modal fade" id="modalCadastro" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+<!-- Modal Cadastro -->
+<div class="modal fade" id="modalCadastro" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Novo Adolescente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Novo Adolescente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-                <div class="modal-body">
-
-                    <label>Nome</label>
-                    <input id="nome" class="form-control mb-2">
-
-                    <label>Nome do Pai</label>
-                    <input id="nome_pai" class="form-control mb-2">
-
-                    <label>Nome da Mãe</label>
-                    <input id="nome_mae" class="form-control mb-2">
-
-                    <label>Contato</label>
-                    <input id="contato" class="form-control mb-3">
-
-                    <h5>Endereço</h5>
-                    <div class="row g-2">
-                        <div class="col-md-5">
-                            <label>Rua</label>
-                            <input id="rua" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label>Número</label>
-                            <input id="numero" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label>Bairro</label>
-                            <input id="bairro" class="form-control">
-                        </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Nome</label>
+                        <input id="nome" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Contato</label>
+                        <input id="contato" class="form-control" placeholder="(11) 99999-9999" />
                     </div>
 
-                    <label class="mt-3">Data de Nascimento</label>
-                    <input type="date" id="data_nasc" class="form-control">
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-success" onclick="cadastrar()">Salvar</button>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
-    <!-- MODAL EDIÇÃO -->
-    <div class="modal fade" id="modalEditar" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Adolescente</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <input type="hidden" id="edit_id">
-
-                    <label>Nome</label>
-                    <input id="edit_nome" class="form-control mb-2">
-
-                    <label>Contato</label>
-                    <input id="edit_contato" class="form-control mb-2">
-
-                    <h5>Endereço</h5>
-                    <div class="row g-2">
-                        <div class="col-md-5">
-                            <label>Rua</label>
-                            <input id="edit_rua" class="form-control">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Número</label>
-                            <input id="edit_numero" class="form-control">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Bairro</label>
-                            <input id="edit_bairro" class="form-control">
-                        </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nome do Pai</label>
+                        <input id="nome_pai" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nome da Mãe</label>
+                        <input id="nome_mae" class="form-control" />
                     </div>
 
-                    <label class="mt-3">Data de Nascimento</label>
-                    <input type="date" id="edit_data_nasc" class="form-control">
+                    <h6 class="mt-2">Endereço</h6>
+                    <div class="col-md-6">
+                        <label class="form-label">Rua</label>
+                        <input id="rua" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Número</label>
+                        <input id="numero" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bairro</label>
+                        <input id="bairro" class="form-control" />
+                    </div>
 
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Nascimento</label>
+                        <input id="data_nasc" type="date" class="form-control" />
+                    </div>
                 </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-warning" onclick="salvarEdicao()">Salvar Alterações</button>
-                </div>
-
             </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success" id="btnSalvarCadastro">Salvar</button>
+            </div>
+
         </div>
     </div>
+</div>
 
+<!-- Modal Editar -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
-    <!-- Bootstrap & JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Adolescente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-    <script>
-        const API = "https://cadastro-adolescentes.onrender.com/adolescentes";
+            <div class="modal-body">
+                <input type="hidden" id="edit_id" />
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Nome</label>
+                        <input id="edit_nome" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Contato</label>
+                        <input id="edit_contato" class="form-control" />
+                    </div>
 
-        // ---------------------------
-        // LISTAR
-        // ---------------------------
-        async function listarTodos() {
-            const resp = await fetch(API + "/");
+                    <h6 class="mt-2">Endereço</h6>
+                    <div class="col-md-6">
+                        <label class="form-label">Rua</label>
+                        <input id="edit_rua" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Número</label>
+                        <input id="edit_numero" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bairro</label>
+                        <input id="edit_bairro" class="form-control" />
+                    </div>
 
-            const json = await resp.json().catch(() => null);
-            if (!json || !json.dados) return;
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Nascimento</label>
+                        <input id="edit_data_nasc" type="date" class="form-control" />
+                    </div>
+                </div>
+            </div>
 
-            const tabela = document.getElementById("listaTabela");
-            tabela.innerHTML = "";
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-warning" id="btnSalvarEdicao">Salvar alterações</button>
+            </div>
 
-            json.dados.forEach(item => {
-                const end = item.endereco || {};
-                const enderecoTexto = `${end.rua || ""}, ${end.numero || ""} - ${end.bairro || ""}`;
+        </div>
+    </div>
+</div>
 
-                const data = item.data_nasc
-                    ? new Date(item.data_nasc).toLocaleDateString("pt-BR")
-                    : "-";
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-                tabela.innerHTML += `
-                    <tr>
-                        <td>${item.nome}</td>
-                        <td>${item.contato || "-"}</td>
-                        <td>${enderecoTexto}</td>
-                        <td>${data}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick='abrirEdicao(${item.id})'>
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deletar(${item.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
+<script>
+const API = "https://cadastro-adolescentes.onrender.com/adolescentes";
 
-        // ---------------------------
-        // CADASTRAR
-        // ---------------------------
-        async function cadastrar() {
-            const body = {
-                nome: nome.value,
-                nome_pai: nome_pai.value,
-                nome_mae: nome_mae.value,
-                contato: contato.value,
-                endereco: {
-                    rua: rua.value,
-                    numero: numero.value,
-                    bairro: bairro.value,
-                },
-                data_nasc: data_nasc.value
-            };
+// util: safe JSON parse
+async function safeJson(resp) {
+    try { return await resp.json(); } catch { return null; }
+}
 
-            await fetch(API + "/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
+// form helpers
+function q(id){ return document.getElementById(id); }
 
-            listarTodos();
-            bootstrap.Modal.getInstance(modalCadastro).hide();
-        }
+// formatar data ISO -> dd/mm/aaaa
+function formatDateIsoToPt(iso) {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR');
+}
 
-        // ---------------------------
-        // ABRIR EDIÇÃO
-        // ---------------------------
-        async function abrirEdicao(id) {
-            const resp = await fetch(API + `/buscar?nome=`); // apenas para obter o registro
-            const todos = await fetch(API + "/").then(r => r.json());
-            const found = todos.dados.find(x => x.id === id);
+// montar texto de endereço
+function enderecoToText(end) {
+    if (!end) return "-";
+    const parts = [];
+    if (end.rua) parts.push(end.rua);
+    if (end.numero) parts.push(end.numero);
+    const ruaNum = parts.length ? parts.join(', ') : '';
+    const bairro = end.bairro ? ` - ${end.bairro}` : '';
+    return (ruaNum || bairro) ? (ruaNum + bairro) : "-";
+}
 
-            const e = found.endereco || {};
+// carregar e listar todos
+async function listarTodos() {
+    const resp = await fetch(API + "/");
+    if (!resp.ok) {
+        const err = await safeJson(resp) || { erro: `Status ${resp.status}` };
+        console.error("Erro listar:", err);
+        return;
+    }
+    const json = await resp.json();
+    const dados = (json && json.dados) ? json.dados : [];
+    const tbody = q('listaTabela');
+    tbody.innerHTML = "";
 
-            edit_id.value = found.id;
-            edit_nome.value = found.nome;
-            edit_contato.value = found.contato || "";
-            edit_rua.value = e.rua || "";
-            edit_numero.value = e.numero || "";
-            edit_bairro.value = e.bairro || "";
-            edit_data_nasc.value = found.data_nasc ? found.data_nasc.substring(0, 10) : "";
+    dados.forEach(item => {
+        const endText = enderecoToText(item.endereco);
+        const nasc = item.data_nasc ? formatDateIsoToPt(item.data_nasc) : "-";
 
-            new bootstrap.Modal(modalEditar).show();
-        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(item.nome)}</td>
+            <td class="nowrap">${escapeHtml(item.contato || "-")}</td>
+            <td class="addr-small">${escapeHtml(endText)}</td>
+            <td class="nowrap">${nasc}</td>
+            <td class="text-center nowrap">
+                <button class="btn btn-sm btn-warning me-1" onclick="abrirEdicao(${item.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deletar(${item.id})" title="Excluir"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-        // ---------------------------
-        // SALVAR EDIÇÃO
-        // ---------------------------
-        async function salvarEdicao() {
-            const id = edit_id.value;
+// escapar texto para inserir no HTML (evita quebrar com aspas)
+function escapeHtml(str){
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
 
-            const body = {
-                nome: edit_nome.value,
-                contato: edit_contato.value,
-                data_nasc: edit_data_nasc.value,
-                endereco: {
-                    rua: edit_rua.value,
-                    numero: edit_numero.value,
-                    bairro: edit_bairro.value,
-                }
-            };
+// CADASTRAR
+document.getElementById('btnSalvarCadastro').addEventListener('click', async () => {
+    const body = {
+        nome: q('nome').value.trim(),
+        nome_pai: q('nome_pai').value.trim() || null,
+        nome_mae: q('nome_mae').value.trim() || null,
+        contato: q('contato').value.trim() || null,
+        endereco: {
+            rua: q('rua').value.trim() || null,
+            numero: q('numero').value.trim() || null,
+            bairro: q('bairro').value.trim() || null
+        },
+        data_nasc: q('data_nasc').value || null
+    };
 
-            await fetch(`${API}/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
+    // validação mínima
+    if (!body.nome) { alert('Informe o nome'); return; }
 
-            listarTodos();
-            bootstrap.Modal.getInstance(modalEditar).hide();
-        }
+    const resp = await fetch(API + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
 
-        // ---------------------------
-        // DELETAR
-        // ---------------------------
-        async function deletar(id) {
-            if (!confirm("Deseja realmente excluir?")) return;
-            await fetch(`${API}/${id}`, { method: "DELETE" });
-            listarTodos();
-        }
+    if (!resp.ok) {
+        const err = await safeJson(resp) || { erro: `Status ${resp.status}` };
+        alert("Erro ao cadastrar: " + (err.erro || JSON.stringify(err)));
+        console.error(err);
+        return;
+    }
 
-        // ---------------------------
-        // BUSCA
-        // ---------------------------
-        buscarNome.addEventListener("input", async () => {
-            const nome = buscarNome.value.trim();
-            if (nome.length < 2) return listarTodos();
+    // fechar modal e recarregar
+    bootstrap.Modal.getInstance(q('modalCadastro')).hide();
+    clearCadastroForm();
+    listarTodos();
+});
 
-            const resp = await fetch(API + `/buscar?nome=${nome}`);
-            const dados = await resp.json();
+// limpar formulário cadastro
+function clearCadastroForm(){
+    ['nome','nome_pai','nome_mae','contato','rua','numero','bairro','data_nasc'].forEach(id => q(id).value = '');
+}
 
-            const tabela = document.getElementById("listaTabela");
-            tabela.innerHTML = "";
+// ABRIR EDIÇÃO
+async function abrirEdicao(id) {
+    // buscar todos e encontrar o registro (simples)
+    const resp = await fetch(API + "/");
+    if (!resp.ok) { alert('Erro ao carregar para edição'); return; }
+    const json = await resp.json();
+    const found = json.dados.find(x => x.id === id);
+    if (!found) { alert('Registro não encontrado'); return; }
 
-            dados.forEach(item => {
-                const end = item.endereco || {};
-                const enderecoTexto = `${end.rua || ""}, ${end.numero || ""} - ${end.bairro || ""}`;
+    q('edit_id').value = found.id;
+    q('edit_nome').value = found.nome || '';
+    q('edit_contato').value = found.contato || '';
+    q('edit_rua').value = found.endereco?.rua || '';
+    q('edit_numero').value = found.endereco?.numero || '';
+    q('edit_bairro').value = found.endereco?.bairro || '';
+    q('edit_data_nasc').value = found.data_nasc ? found.data_nasc.substring(0,10) : '';
 
-                const data = item.data_nasc
-                    ? new Date(item.data_nasc).toLocaleDateString("pt-BR")
-                    : "-";
+    new bootstrap.Modal(q('modalEditar')).show();
+}
 
-                tabela.innerHTML += `
-                    <tr>
-                        <td>${item.nome}</td>
-                        <td>${item.contato || "-"}</td>
-                        <td>${enderecoTexto}</td>
-                        <td>${data}</td>
-                    </tr>
-                `;
-            });
-        });
+// SALVAR EDIÇÃO
+document.getElementById('btnSalvarEdicao').addEventListener('click', async () => {
+    const id = q('edit_id').value;
+    if (!id) return alert('Id ausente');
 
-        listarTodos();
-    </script>
+    const body = {
+        nome: q('edit_nome').value.trim(),
+        contato: q('edit_contato').value.trim() || null,
+        endereco: {
+            rua: q('edit_rua').value.trim() || null,
+            numero: q('edit_numero').value.trim() || null,
+            bairro: q('edit_bairro').value.trim() || null
+        },
+        data_nasc: q('edit_data_nasc').value || null
+    };
 
+    const resp = await fetch(`${API}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    if (!resp.ok) {
+        const err = await safeJson(resp) || { erro: `Status ${resp.status}` };
+        alert("Erro ao atualizar: " + (err.erro || JSON.stringify(err)));
+        console.error(err);
+        return;
+    }
+
+    bootstrap.Modal.getInstance(q('modalEditar')).hide();
+    listarTodos();
+});
+
+// DELETAR
+async function deletar(id) {
+    if (!confirm('Deseja excluir este registro?')) return;
+    const resp = await fetch(`${API}/${id}`, { method: "DELETE" });
+    if (!resp.ok) {
+        const err = await safeJson(resp) || { erro: `Status ${resp.status}` };
+        alert("Erro ao excluir: " + (err.erro || JSON.stringify(err)));
+        console.error(err);
+        return;
+    }
+    listarTodos();
+}
+
+// BUSCA em tempo real
+q('buscarNome').addEventListener('input', async () => {
+    const nome = q('buscarNome').value.trim();
+    if (nome.length < 2) { listarTodos(); return; }
+
+    const resp = await fetch(API + `/buscar?nome=${encodeURIComponent(nome)}`);
+    if (!resp.ok) return;
+    const dados = await resp.json();
+    const tbody = q('listaTabela');
+    tbody.innerHTML = "";
+
+    (Array.isArray(dados) ? dados : []).forEach(item => {
+        const endText = enderecoToText(item.endereco);
+        const nasc = item.data_nasc ? formatDateIsoToPt(item.data_nasc) : "-";
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(item.nome)}</td>
+            <td class="nowrap">${escapeHtml(item.contato || "-")}</td>
+            <td class="addr-small">${escapeHtml(endText)}</td>
+            <td class="nowrap">${nasc}</td>
+            <td class="text-center nowrap">
+                <button class="btn btn-sm btn-warning me-1" onclick="abrirEdicao(${item.id})"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deletar(${item.id})"><i class="bi bi-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+});
+
+// carregar ao abrir
+listarTodos();
+</script>
 </body>
-
 </html>
