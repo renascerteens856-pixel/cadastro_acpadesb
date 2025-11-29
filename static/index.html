@@ -12,11 +12,11 @@
 
     <style>
         body {
-            background: #f5f6fa;
+            background: #eef1f5;
         }
 
         .card {
-            border-radius: 12px;
+            border-radius: 14px;
         }
 
         .table thead {
@@ -54,14 +54,14 @@
         <!-- Tabela -->
         <div class="card shadow-sm">
             <div class="card-body">
-                <table class="table table-hover">
+                <table class="table table-hover table-bordered">
                     <thead>
                         <tr>
                             <th>Nome</th>
                             <th>Contato</th>
-                            <th>Bairro</th>
-                            <th>Data Nasc.</th>
-                            <th>Ações</th>
+                            <th>Endereço</th>
+                            <th>Nascimento</th>
+                            <th width="120">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="listaTabela"></tbody>
@@ -73,7 +73,7 @@
 
     <!-- MODAL CADASTRO -->
     <div class="modal fade" id="modalCadastro" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
 
                 <div class="modal-header">
@@ -93,17 +93,21 @@
                     <input id="nome_mae" class="form-control mb-2">
 
                     <label>Contato</label>
-                    <input id="contato" class="form-control mb-2">
+                    <input id="contato" class="form-control mb-3">
 
-                    <h6 class="mt-3">Endereço</h6>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <h5>Endereço</h5>
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <label>Rua</label>
+                            <input id="rua" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Número</label>
+                            <input id="numero" class="form-control">
+                        </div>
+                        <div class="col-md-4">
                             <label>Bairro</label>
                             <input id="bairro" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label>Cidade</label>
-                            <input id="cidade" class="form-control">
                         </div>
                     </div>
 
@@ -124,7 +128,7 @@
 
     <!-- MODAL EDIÇÃO -->
     <div class="modal fade" id="modalEditar" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
 
                 <div class="modal-header">
@@ -142,10 +146,25 @@
                     <label>Contato</label>
                     <input id="edit_contato" class="form-control mb-2">
 
-                    <label>Bairro</label>
-                    <input id="edit_bairro" class="form-control mb-2">
+                    <h5>Endereço</h5>
+                    <div class="row g-2">
+                        <div class="col-md-5">
+                            <label>Rua</label>
+                            <input id="edit_rua" class="form-control">
+                        </div>
 
-                    <label>Data de Nascimento</label>
+                        <div class="col-md-3">
+                            <label>Número</label>
+                            <input id="edit_numero" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Bairro</label>
+                            <input id="edit_bairro" class="form-control">
+                        </div>
+                    </div>
+
+                    <label class="mt-3">Data de Nascimento</label>
                     <input type="date" id="edit_data_nasc" class="form-control">
 
                 </div>
@@ -167,30 +186,33 @@
         const API = "https://cadastro-adolescentes.onrender.com/adolescentes";
 
         // ---------------------------
-        // LISTAR TODOS
+        // LISTAR
         // ---------------------------
         async function listarTodos() {
             const resp = await fetch(API + "/");
-            if (!resp.ok) return;
 
-            const json = await resp.json();
-            const dados = json.dados ?? [];
+            const json = await resp.json().catch(() => null);
+            if (!json || !json.dados) return;
 
             const tabela = document.getElementById("listaTabela");
             tabela.innerHTML = "";
 
-            dados.forEach(item => {
-                const bairro = item.endereco?.bairro || "-";
-                const data = item.data_nasc ? new Date(item.data_nasc).toLocaleDateString("pt-BR") : "-";
+            json.dados.forEach(item => {
+                const end = item.endereco || {};
+                const enderecoTexto = `${end.rua || ""}, ${end.numero || ""} - ${end.bairro || ""}`;
+
+                const data = item.data_nasc
+                    ? new Date(item.data_nasc).toLocaleDateString("pt-BR")
+                    : "-";
 
                 tabela.innerHTML += `
                     <tr>
                         <td>${item.nome}</td>
                         <td>${item.contato || "-"}</td>
-                        <td>${bairro}</td>
+                        <td>${enderecoTexto}</td>
                         <td>${data}</td>
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="abrirEdicao(${item.id}, '${item.nome}', '${bairro}', '${item.contato}', '${item.data_nasc}')">
+                            <button class="btn btn-sm btn-warning" onclick='abrirEdicao(${item.id})'>
                                 <i class="bi bi-pencil-square"></i>
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="deletar(${item.id})">
@@ -202,7 +224,6 @@
             });
         }
 
-
         // ---------------------------
         // CADASTRAR
         // ---------------------------
@@ -212,7 +233,11 @@
                 nome_pai: nome_pai.value,
                 nome_mae: nome_mae.value,
                 contato: contato.value,
-                endereco: { bairro: bairro.value, cidade: cidade.value },
+                endereco: {
+                    rua: rua.value,
+                    numero: numero.value,
+                    bairro: bairro.value,
+                },
                 data_nasc: data_nasc.value
             };
 
@@ -223,26 +248,32 @@
             });
 
             listarTodos();
-            bootstrap.Modal.getInstance(document.getElementById("modalCadastro")).hide();
+            bootstrap.Modal.getInstance(modalCadastro).hide();
         }
-
 
         // ---------------------------
         // ABRIR EDIÇÃO
         // ---------------------------
-        function abrirEdicao(id, nome, bairro, contato, data_nasc) {
-            edit_id.value = id;
-            edit_nome.value = nome;
-            edit_bairro.value = bairro;
-            edit_contato.value = contato || "";
-            edit_data_nasc.value = data_nasc ? data_nasc.substring(0, 10) : "";
+        async function abrirEdicao(id) {
+            const resp = await fetch(API + `/buscar?nome=`); // apenas para obter o registro
+            const todos = await fetch(API + "/").then(r => r.json());
+            const found = todos.dados.find(x => x.id === id);
 
-            new bootstrap.Modal(document.getElementById("modalEditar")).show();
+            const e = found.endereco || {};
+
+            edit_id.value = found.id;
+            edit_nome.value = found.nome;
+            edit_contato.value = found.contato || "";
+            edit_rua.value = e.rua || "";
+            edit_numero.value = e.numero || "";
+            edit_bairro.value = e.bairro || "";
+            edit_data_nasc.value = found.data_nasc ? found.data_nasc.substring(0, 10) : "";
+
+            new bootstrap.Modal(modalEditar).show();
         }
 
-
         // ---------------------------
-        // SALVAR EDIÇÃO (PUT)
+        // SALVAR EDIÇÃO
         // ---------------------------
         async function salvarEdicao() {
             const id = edit_id.value;
@@ -251,7 +282,11 @@
                 nome: edit_nome.value,
                 contato: edit_contato.value,
                 data_nasc: edit_data_nasc.value,
-                endereco: { bairro: edit_bairro.value }
+                endereco: {
+                    rua: edit_rua.value,
+                    numero: edit_numero.value,
+                    bairro: edit_bairro.value,
+                }
             };
 
             await fetch(`${API}/${id}`, {
@@ -261,53 +296,50 @@
             });
 
             listarTodos();
-            bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
+            bootstrap.Modal.getInstance(modalEditar).hide();
         }
-
 
         // ---------------------------
         // DELETAR
         // ---------------------------
         async function deletar(id) {
-            if (!confirm("Deseja realmente excluir este registro?")) return;
-
+            if (!confirm("Deseja realmente excluir?")) return;
             await fetch(`${API}/${id}`, { method: "DELETE" });
             listarTodos();
         }
 
-
         // ---------------------------
-        // BUSCA EM TEMPO REAL
+        // BUSCA
         // ---------------------------
         buscarNome.addEventListener("input", async () => {
             const nome = buscarNome.value.trim();
-
             if (nome.length < 2) return listarTodos();
 
             const resp = await fetch(API + `/buscar?nome=${nome}`);
-            if (!resp.ok) return;
-
             const dados = await resp.json();
 
             const tabela = document.getElementById("listaTabela");
             tabela.innerHTML = "";
 
             dados.forEach(item => {
-                const bairro = item.endereco?.bairro || "-";
-                const data = item.data_nasc ? new Date(item.data_nasc).toLocaleDateString("pt-BR") : "-";
+                const end = item.endereco || {};
+                const enderecoTexto = `${end.rua || ""}, ${end.numero || ""} - ${end.bairro || ""}`;
+
+                const data = item.data_nasc
+                    ? new Date(item.data_nasc).toLocaleDateString("pt-BR")
+                    : "-";
 
                 tabela.innerHTML += `
                     <tr>
                         <td>${item.nome}</td>
                         <td>${item.contato || "-"}</td>
-                        <td>${bairro}</td>
+                        <td>${enderecoTexto}</td>
                         <td>${data}</td>
                     </tr>
                 `;
             });
         });
 
-        // Carregar ao abrir
         listarTodos();
     </script>
 
