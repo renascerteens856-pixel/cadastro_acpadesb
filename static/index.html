@@ -1,276 +1,346 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cadastro de Adolescentes</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style> body{padding:1rem} .table-responsive{max-height:60vh;overflow:auto} </style>
+    <meta charset="UTF-8" />
+    <title>Adolescentes - Lista</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background: #f4f4f4;
+        }
+
+        .card {
+            margin-top: 40px;
+        }
+
+        #logoTopo {
+            display: block;
+            margin: 20px auto;
+            max-width: 250px;
+            height: auto;
+        }
+    </style>
 </head>
+
 <body>
-<div class="container">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h1 class="h4 mb-0">Cadastro de Adolescentes</h1>
-      <small class="text-muted">Integração com sua API Flask + Supabase</small>
-    </div>
-    <div>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrar">Novo Cadastro</button>
-    </div>
-  </div>
+    <img id="logoTopo" src="static/Images/logo_adolescentes.PNG" alt="Logo Adolescentes" />
 
-  <div class="row mb-3">
-    <div class="col-md-6">
-      <div class="input-group">
-        <input id="campoBusca" class="form-control" placeholder="Buscar por nome..." />
-        <button id="btnBuscar" class="btn btn-outline-primary">Buscar</button>
-        <button id="btnLimpar" class="btn btn-outline-secondary">Limpar</button>
-      </div>
-    </div>
-    <div class="col-md-6 text-end">
-      <button id="btnReload" class="btn btn-sm btn-outline-secondary">Recarregar tudo</button>
-    </div>
-  </div>
+    <div class="container">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Lista de Adolescentes</h4>
+                <button class="btn btn-success" id="btnNovo" data-bs-toggle="modal" data-bs-target="#modalCadastro">Novo Adolescente</button>
+            </div>
 
-  <div class="card">
-    <div class="card-body">
-      <div id="resultado">
-        <div class="table-responsive">
-          <table class="table table-hover table-sm" id="tabela">
-            <thead class="table-light">
-              <tr>
-                <th>#</th><th>Nome</th><th>Contato</th><th>Data Nasc</th><th>Bairro / Cidade</th><th>Ações</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+            <div class="card-body">
+                <table class="table table-bordered table-striped text-center align-middle" id="tabela">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Pai</th>
+                            <th>Mãe</th>
+                            <th>Contato</th>
+                            <th>Data Nasc.</th>
+                            <th>Endereço (Rua, Nº, Bairro)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-adolescentes">
+                        <!-- Conteúdo carregado pela API -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Modal Cadastrar / Editar -->
-<div class="modal fade" id="modalCadastrar" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="formModal">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle">Novo Adolescente</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Modal Cadastro / Edição -->
+    <div class="modal fade" id="modalCadastro" tabindex="-1" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="formCadastro" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCadastroLabel">Cadastrar Adolescente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="editandoId" />
+
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome *</label>
+                        <input type="text" id="nome" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nome_pai" class="form-label">Nome do Pai</label>
+                        <input type="text" id="nome_pai" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nome_mae" class="form-label">Nome da Mãe</label>
+                        <input type="text" id="nome_mae" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contato" class="form-label">Contato</label>
+                        <input type="text" id="contato" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="data_nasc" class="form-label">Data de Nascimento</label>
+                        <input type="date" id="data_nasc" class="form-control" />
+                    </div>
+
+                    <h6>Endereço</h6>
+
+                    <div class="mb-3">
+                        <label for="rua" class="form-label">Rua</label>
+                        <input type="text" id="rua" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="numero" class="form-label">Número</label>
+                        <input type="text" id="numero" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bairro" class="form-label">Bairro</label>
+                        <input type="text" id="bairro" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-body">
-          <input type="hidden" name="id" />
-          <div class="row g-2">
-            <div class="col-md-6"><label class="form-label">Nome</label><input name="nome" class="form-control" required></div>
-            <div class="col-md-3"><label class="form-label">Nome do pai</label><input name="nome_pai" class="form-control"></div>
-            <div class="col-md-3"><label class="form-label">Nome da mãe</label><input name="nome_mae" class="form-control"></div>
-            <div class="col-md-3"><label class="form-label">Contato</label><input name="contato" class="form-control"></div>
-            <div class="col-md-3"><label class="form-label">Data de nascimento</label><input type="date" name="data_nasc" class="form-control"></div>
-            <div class="col-md-3"><label class="form-label">Bairro</label><input name="bairro" class="form-control"></div>
-            <div class="col-md-3"><label class="form-label">Cidade</label><input name="cidade" class="form-control"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div id="modalFeedback" class="me-auto"></div>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-const API_BASE = "https://cadastro-adolescentes.onrender.com";
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-function showAlert(el, msg, type='success'){
-  el.innerHTML = `<div class="alert alert-${type} py-1 mb-0">${msg}</div>`;
-  setTimeout(()=>el.innerHTML='', 3500);
-}
+    <script>
+        const API_URL = "https://cadastro-adolescentes.onrender.com/adolescentes/";
 
-async function carregarTodos(){
-  const tbody = document.querySelector('#tabela tbody');
-  tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
-  try{
-    const res = await fetch(`${API_BASE}/todos`);
-    const dados = await res.json();
-    if (!res.ok) throw new Error(JSON.stringify(dados));
-    if (!dados || !dados.length){
-      tbody.innerHTML = '<tr><td colspan="6">Nenhum registro encontrado</td></tr>';
-      return;
-    }
-    tbody.innerHTML = '';
-    dados.forEach(item=>{
-      const endereco = item.endereco || {};
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.id ?? ''}</td>
-        <td>${escapeHtml(item.nome ?? '')}</td>
-        <td>${escapeHtml(item.contato ?? '')}</td>
-        <td>${item.data_nasc ?? ''}</td>
-        <td>${escapeHtml(endereco.bairro||'')} / ${escapeHtml(endereco.cidade||'')}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${item.id}">Editar</button>
-          <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${item.id}">Excluir</button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
-  }catch(err){
-    document.querySelector('#tabela tbody').innerHTML = `<tr><td colspan="6">Erro: ${err.message}</td></tr>`;
-    console.error(err);
-  }
-}
+        // Base64 do logo para impressão (substitua conforme sua logo)
+        const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAYAAACpt04RAAAAAXNSR0IArs4c6QAAAQ1JREFUeF7t0jEOgCAMRFGRqvL2e+GJQAZh3qW4NFDfuIlmLTPF9RAAAAAAAAAAAAXp5nl/rILszwZ+59VxvWnPXvWgOsxW1fW7Q3lnMHZ+osKp4V+3wzPWe2b8q88w1Fp9r9w1GeTzveE2a8aU3w57/j/ehqLu+9F9+G9No87tZ/5h5WmwJAAAAAAAAAAAAwG+AtgDa3uw8kMZ5bkAAAAASUVORK5CYII=";
 
-function escapeHtml(s){
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-}
+        function formatarDataBR(dataIso) {
+            if (!dataIso) return "";
+            const data = new Date(dataIso);
+            const dia = String(data.getDate()).padStart(2, "0");
+            const mes = String(data.getMonth() + 1).padStart(2, "0");
+            const ano = data.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
 
-// busca por nome via /buscar?nome=
-document.getElementById('btnBuscar').addEventListener('click', async ()=>{
-  const nome = document.getElementById('campoBusca').value.trim();
-  const tbody = document.querySelector('#tabela tbody');
-  if (!nome){
-    showAlert(document.getElementById('modalFeedback'), 'Digite um nome para buscar', 'warning');
-    return;
-  }
-  tbody.innerHTML = '<tr><td colspan="6">Buscando...</td></tr>';
-  try{
-    const res = await fetch(`${API_BASE}/buscar?nome=${encodeURIComponent(nome)}`);
-    const dados = await res.json();
-    if (!res.ok) throw new Error(JSON.stringify(dados));
-    // dados já é lista
-    if (!dados.length){
-      tbody.innerHTML = '<tr><td colspan="6">Nenhum resultado</td></tr>';
-      return;
-    }
-    tbody.innerHTML = '';
-    dados.forEach(item=>{
-      const endereco = item.endereco || {};
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.id ?? ''}</td>
-        <td>${escapeHtml(item.nome ?? '')}</td>
-        <td>${escapeHtml(item.contato ?? '')}</td>
-        <td>${item.data_nasc ?? ''}</td>
-        <td>${escapeHtml(endereco.bairro||'')} / ${escapeHtml(endereco.cidade||'')}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${item.id}">Editar</button>
-          <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${item.id}">Excluir</button>
-        </td>`;
-      document.querySelector('#tabela tbody').appendChild(tr);
-    });
-  }catch(err){
-    document.querySelector('#tabela tbody').innerHTML = `<tr><td colspan="6">Erro: ${err.message}</td></tr>`;
-  }
-});
+        async function listarAdolescentes() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error("Erro ao listar adolescentes");
+                const dados = await res.json();
 
-document.getElementById('btnLimpar').addEventListener('click', ()=>{
-  document.getElementById('campoBusca').value = '';
-  carregarTodos();
-});
-document.getElementById('btnReload').addEventListener('click', cargar => carregarTodos());
+                const tbody = document.getElementById("lista-adolescentes");
+                tbody.innerHTML = "";
 
-// delegação: editar / excluir
-document.addEventListener('click', async (e)=>{
-  if (e.target.matches('.btn-edit')){
-    const id = e.target.dataset.id;
-    abrirEditar(id);
-  }
-  if (e.target.matches('.btn-delete')){
-    const id = e.target.dataset.id;
-    if (!confirm('Confirmar exclusão do registro #' + id + '?')) return;
-    try{
-      const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(JSON.stringify(data));
-      alert(data.mensagem || 'Excluído');
-      carregarTodos();
-    }catch(err){
-      alert('Erro ao excluir: ' + err.message);
-    }
-  }
-});
+                dados.forEach((item) => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${item.id}</td>
+                        <td>${item.nome}</td>
+                        <td>${item.nome_pai || "-"}</td>
+                        <td>${item.nome_mae || "-"}</td>
+                        <td>${item.contato || "-"}</td>
+                        <td>${formatarDataBR(item.data_nasc)}</td>
+                        <td>${item.endereco?.rua || "-"}, ${item.endereco?.numero || "-"}, ${item.endereco?.bairro || "-"}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary btn-editar" data-id="${item.id}">Editar</button>
+                            <button class="btn btn-sm btn-danger btn-excluir" data-id="${item.id}">Excluir</button>
+                            <button class="btn btn-sm btn-secondary btn-imprimir" data-id="${item.id}">Imprimir</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
 
-// abrir modal e preencher para editar (busca local em /todos)
-const modalEl = document.getElementById('modalCadastrar');
-const modal = new bootstrap.Modal(modalEl);
-async function abrirEditar(id){
-  try{
-    const res = await fetch(`${API_BASE}/todos`);
-    const dados = await res.json();
-    if (!res.ok) throw new Error(JSON.stringify(dados));
-    const item = (dados||[]).find(x => String(x.id) === String(id));
-    if (!item) throw new Error('Registro não encontrado');
-    const form = document.getElementById('formModal');
-    form.elements['id'].value = item.id;
-    form.elements['nome'].value = item.nome || '';
-    form.elements['nome_pai'].value = item.nome_pai || '';
-    form.elements['nome_mae'].value = item.nome_mae || '';
-    form.elements['contato'].value = item.contato || '';
-    form.elements['data_nasc'].value = item.data_nasc || '';
-    form.elements['bairro'].value = (item.endereco && item.endereco.bairro) || '';
-    form.elements['cidade'].value = (item.endereco && item.endereco.cidade) || '';
-    document.getElementById('modalTitle').textContent = 'Editar Adolescente';
-    modal.show();
-  }catch(err){
-    alert('Erro ao abrir edição: ' + err.message);
-  }
-}
+                document.querySelectorAll(".btn-editar").forEach((btn) => {
+                    btn.onclick = () => carregarParaEditar(btn.dataset.id);
+                });
+                document.querySelectorAll(".btn-excluir").forEach((btn) => {
+                    btn.onclick = () => excluirAdolescente(btn.dataset.id);
+                });
+                document.querySelectorAll(".btn-imprimir").forEach((btn) => {
+                    btn.onclick = () => imprimirAdolescente(btn.dataset.id);
+                });
+            } catch (error) {
+                alert(error.message);
+            }
+        }
 
-// cadastrar / salvar edição
-document.getElementById('formModal').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  const form = ev.target;
-  const formData = new FormData(form);
-  const payload = {};
-  for (const [k,v] of formData.entries()){
-    if (k === 'id') continue;
-    if (v) payload[k] = v;
-  }
-  const endereco = {};
-  if (payload.bairro) endereco.bairro = payload.bairro;
-  if (payload.cidade) endereco.cidade = payload.cidade;
-  if (Object.keys(endereco).length) payload.endereco = endereco;
-  delete payload.bairro; delete payload.cidade;
+        async function carregarParaEditar(id) {
+            try {
+                const res = await fetch(API_URL + id);
+                if (!res.ok) throw new Error("Erro ao carregar adolescente");
+                const item = await res.json();
 
-  const id = form.elements['id'].value;
-  const feedback = document.getElementById('modalFeedback');
+                document.getElementById("editandoId").value = item.id;
+                document.getElementById("nome").value = item.nome;
+                document.getElementById("nome_pai").value = item.nome_pai || "";
+                document.getElementById("nome_mae").value = item.nome_mae || "";
+                document.getElementById("contato").value = item.contato || "";
+                document.getElementById("data_nasc").value = item.data_nasc || "";
+                document.getElementById("rua").value = item.endereco?.rua || "";
+                document.getElementById("numero").value = item.endereco?.numero || "";
+                document.getElementById("bairro").value = item.endereco?.bairro || "";
 
-  try{
-    let res, data;
-    if (id){
-      // PUT
-      res = await fetch(`${API_BASE}/${id}`, {
-        method: 'PUT',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      data = await res.json();
-      if (!res.ok) throw new Error(JSON.stringify(data));
-      showAlert(feedback, 'Atualizado com sucesso', 'success');
-    } else {
-      // POST
-      res = await fetch(`${API_BASE}/`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      data = await res.json();
-      if (!res.ok) throw new Error(JSON.stringify(data));
-      showAlert(feedback, 'Cadastrado com sucesso', 'success');
-    }
-    form.reset();
-    modal.hide();
-    carregarTodos();
-  }catch(err){
-    showAlert(feedback, 'Erro: ' + err.message, 'danger');
-  }
-});
+                document.getElementById("modalCadastroLabel").textContent = "Editar Adolescente";
 
-// inicial
-carregarTodos();
-</script>
+                const modalEl = document.getElementById("modalCadastro");
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        document.getElementById("btnNovo").onclick = () => {
+            document.getElementById("formCadastro").reset();
+            document.getElementById("editandoId").value = "";
+            document.getElementById("modalCadastroLabel").textContent = "Cadastrar Adolescente";
+        };
+
+        document.getElementById("formCadastro").onsubmit = async function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById("editandoId").value;
+            const metodo = id ? "PUT" : "POST";
+            const url = id ? API_URL + id : API_URL;
+
+            const data = {
+                nome: document.getElementById("nome").value.trim(),
+                nome_pai: document.getElementById("nome_pai").value.trim(),
+                nome_mae: document.getElementById("nome_mae").value.trim(),
+                contato: document.getElementById("contato").value.trim(),
+                data_nasc: document.getElementById("data_nasc").value || null,
+                endereco: {
+                    rua: document.getElementById("rua").value.trim(),
+                    numero: document.getElementById("numero").value.trim(),
+                    bairro: document.getElementById("bairro").value.trim(),
+                },
+            };
+
+            try {
+                const res = await fetch(url, {
+                    method: metodo,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.erro || "Erro ao salvar");
+                }
+
+                const modalEl = document.getElementById("modalCadastro");
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+
+                listarAdolescentes();
+            } catch (error) {
+                alert(error.message);
+            }
+        };
+
+        async function excluirAdolescente(id) {
+            if (!confirm("Confirma exclusão?")) return;
+
+            try {
+                const res = await fetch(API_URL + id, { method: "DELETE" });
+                if (!res.ok) throw new Error("Erro ao excluir");
+
+                listarAdolescentes();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function imprimirAdolescente(id) {
+            try {
+                const res = await fetch(API_URL + id);
+                if (!res.ok) throw new Error("Erro ao carregar adolescente para impressão");
+                const item = await res.json();
+
+                const conteudo = `
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <img src="static/Images/logo_adolescentes.PNG" alt="Logo" style="max-width:150px;" />
+                    </div>
+                    <h2 style="text-align:center; margin-bottom: 20px;">Ficha do Adolescente</h2>
+                    <table border="1" cellspacing="0" cellpadding="8" style="width:100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+                        <tbody>
+                            <tr>
+                                <th align="left">ID</th>
+                                <td>${item.id}</td>
+                            </tr>
+                            <tr>
+                                <th align="left">Nome</th>
+                                <td>${item.nome}</td>
+                            </tr>
+                            <tr>
+                                <th align="left">Nome do Pai</th>
+                                <td>${item.nome_pai || "-"}</td>
+                            </tr>
+                            <tr>
+                                <th align="left">Nome da Mãe</th>
+                                <td>${item.nome_mae || "-"}</td>
+                            </tr>
+                            <tr>
+                                <th align="left">Contato</th>
+                                <td>${item.contato || "-"}</td>
+                            </tr>
+                            <tr>
+                                <th align="left">Data de Nascimento</th>
+                                <td>${formatarDataBR(item.data_nasc)}</td>
+                            </tr>
+                            <tr>
+                                <th align="left">Endereço</th>
+                                <td>${item.endereco?.rua || "-"}, ${item.endereco?.numero || "-"}, ${item.endereco?.bairro || "-"}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+
+                const printWindow = window.open("", "", "width=600,height=700");
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Ficha Adolescente</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 30px; }
+                            h2 { text-align: center; margin-bottom: 20px; }
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid #000; padding: 8px; }
+                            th { background-color: #f0f0f0; text-align: left; }
+                        </style>
+                    </head>
+                    <body>
+                        ${conteudo}
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", listarAdolescentes);
+    </script>
 </body>
+
 </html>
