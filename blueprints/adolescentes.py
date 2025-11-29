@@ -20,8 +20,10 @@ def cadastrar():
         "nome": adolescente.nome,
         "nome_pai": adolescente.nome_pai,
         "nome_mae": adolescente.nome_mae,
-        "idade": adolescente.idade,
-        "endereco": adolescente.endereco,  # JSON funcionando
+        "endereco": adolescente.endereco,
+        "contato": adolescente.contato,
+        "data_nasc": adolescente.data_nasc
+    }).execute()
     }).execute()
 
     if response.error:
