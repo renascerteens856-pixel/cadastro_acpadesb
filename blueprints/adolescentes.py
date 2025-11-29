@@ -24,7 +24,6 @@ def cadastrar():
         "contato": adolescente.contato,
         "data_nasc": adolescente.data_nasc
     }).execute()
-    }).execute()
 
     if response.error:
         return jsonify({"erro": response.error.message}), 500
