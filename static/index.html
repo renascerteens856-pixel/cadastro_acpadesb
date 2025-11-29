@@ -4,18 +4,112 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cadastro de Adolescentes</title>
+
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-        h1 { text-align: center; }
-        form, .result, .list { border: 1px solid #ccc; padding: 15px; border-radius: 10px; margin-top: 20px; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input { width: 100%; padding: 8px; margin-top: 4px; }
-        button { margin-top: 15px; padding: 10px 15px; cursor: pointer; }
-        .adolescente-card { border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-top: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #4e73df;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 { margin-top: 30px; }
+
+        form, .box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 4px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: #4e73df;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: .3s;
+        }
+        button:hover {
+            background: #2e59d9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            margin-top: 15px;
+        }
+
+        .btn-edit {
+            background: #1cc88a;
+        }
+        .btn-edit:hover {
+            background: #17a673;
+        }
+
+        .btn-delete {
+            background: #e74a3b;
+        }
+        .btn-delete:hover {
+            background: #be3a2c;
+        }
+
+        /* Modal */
+        #modalEditar {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        #modalContent {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 400px;
+        }
     </style>
 </head>
 <body>
+
+<header>
     <h1>Sistema de Cadastro de Adolescentes</h1>
+</header>
+
+<div class="container">
 
     <!-- Cadastro -->
     <form id="formCadastro">
@@ -49,88 +143,168 @@
         <button type="submit">Cadastrar</button>
     </form>
 
-    <div class="result" id="resultadoCadastro"></div>
+    <div id="resultadoCadastro" class="box"></div>
 
-    <!-- Buscar por nome -->
-    <div class="list">
-        <h2>Buscar Adolescente</h2>
-        <input type="text" id="buscarNome" placeholder="Digite um nome" />
+    <!-- Buscar -->
+    <div class="box">
+        <h2>Buscar por Nome</h2>
+        <input type="text" id="buscarNome" placeholder="Digite o nome">
         <button onclick="buscarPorNome()">Buscar</button>
         <div id="resultadoBusca"></div>
     </div>
 
-    <!-- Listar todos -->
-    <div class="list">
+    <!-- Listar -->
+    <div class="box">
         <h2>Listar Todos</h2>
         <button onclick="listarTodos()">Carregar Lista</button>
         <div id="listaTodos"></div>
     </div>
 
+</div>
+
+<!-- Modal de edição -->
+<div id="modalEditar">
+    <div id="modalContent">
+        <h3>Editar Adolescente</h3>
+
+        <input type="hidden" id="edit_id">
+
+        <label>Nome:</label>
+        <input type="text" id="edit_nome">
+
+        <label>Bairro:</label>
+        <input type="text" id="edit_bairro">
+
+        <label>Contato:</label>
+        <input type="text" id="edit_contato">
+
+        <button class="btn-edit" onclick="salvarEdicao()">Salvar</button>
+        <button onclick="fecharModal()">Cancelar</button>
+    </div>
+</div>
+
 <script>
-    const API = "https://cadastro-adolescentes.onrender.com/adolescentes";
+const API = "https://cadastro-adolescentes.onrender.com/adolescentes";
 
-    document.getElementById("formCadastro").addEventListener("submit", async (e) => {
-        e.preventDefault();
+function formatarData(dataISO) {
+    if (!dataISO) return "-";
+    const d = new Date(dataISO);
+    return d.toLocaleDateString("pt-BR");
+}
 
-        const data = {
-            nome: document.getElementById("nome").value,
-            nome_pai: document.getElementById("nome_pai").value,
-            nome_mae: document.getElementById("nome_mae").value,
-            data_nasc: document.getElementById("data_nasc").value,
-            contato: document.getElementById("contato").value,
-            endereco: {
-                rua: document.getElementById("rua").value,
-                numero: document.getElementById("numero").value,
-                bairro: document.getElementById("bairro").value
-            }
-        };
+document.getElementById("formCadastro").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-        const resp = await fetch(API + "/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
+    const data = {
+        nome: nome.value,
+        nome_pai: nome_pai.value,
+        nome_mae: nome_mae.value,
+        data_nasc: data_nasc.value,
+        contato: contato.value,
+        endereco: {
+            rua: rua.value,
+            numero: numero.value,
+            bairro: bairro.value
+        }
+    };
 
-        const json = await resp.json();
-        document.getElementById("resultadoCadastro").innerHTML = "<pre>" + JSON.stringify(json, null, 2) + "</pre>";
+    const resp = await fetch(API + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
     });
 
-    async function buscarPorNome() {
-        const nome = document.getElementById("buscarNome").value;
-        const resp = await fetch(API + `/buscar?nome=${nome}`);
-        const json = await resp.json();
+    const json = await resp.json();
+    resultadoCadastro.innerHTML = "<pre>" + JSON.stringify(json, null, 2) + "</pre>";
+});
 
-        let html = "";
-        if (Array.isArray(json)) {
-            json.forEach(a => {
-                html += `<div class='adolescente-card'>
-                    <strong>${a.nome}</strong><br>
-                    Pai: ${a.nome_pai || "-"}<br>
-                    Mãe: ${a.nome_mae || "-"}<br>
-                    Bairro: ${a.endereco?.bairro || "-"}
-                </div>`;
-            });
-        } else {
-            html = `<pre>${JSON.stringify(json, null, 2)}</pre>`;
-        }
 
-        document.getElementById("resultadoBusca").innerHTML = html;
-    }
+async function listarTodos() {
+    const resp = await fetch(API + "/");
+    const json = await resp.json();
 
-    async function listarTodos() {
-        const resp = await fetch(API + "/");
-        const json = await resp.json();
+    listaTodos.innerHTML = "";
 
-        let html = "";
-        json.dados?.forEach(a => {
-            html += `<div class='adolescente-card'>
+    json.dados.forEach(a => {
+        listaTodos.innerHTML += `
+            <div class="card">
                 <strong>${a.nome}</strong> (ID: ${a.id})<br>
-                Bairro: ${a.endereco?.bairro || "-"}
-            </div>`;
-        });
+                Bairro: ${a.endereco?.bairro || "-"}<br>
+                Contato: ${a.contato || "-"}<br>
+                Nascimento: ${formatarData(a.data_nasc)}<br><br>
 
-        document.getElementById("listaTodos").innerHTML = html;
+                <button class="btn-edit" onclick="abrirModal(${a.id}, '${a.nome}', '${a.endereco?.bairro || ""}', '${a.contato || ""}')">Editar</button>
+                <button class="btn-delete" onclick="deletar(${a.id})">Excluir</button>
+            </div>
+        `;
+    });
+}
+
+
+async function buscarPorNome() {
+    const nome = buscarNome.value;
+
+    const resp = await fetch(API + `/buscar?nome=${nome}`);
+    const json = await resp.json();
+
+    resultadoBusca.innerHTML = "";
+
+    if (!Array.isArray(json)) {
+        resultadoBusca.innerHTML = `<pre>${JSON.stringify(json, null, 2)}</pre>`;
+        return;
     }
+
+    json.forEach(a => {
+        resultadoBusca.innerHTML += `
+            <div class="card">
+                <strong>${a.nome}</strong><br>
+                Bairro: ${a.endereco?.bairro || "-"}<br>
+                Nascimento: ${formatarData(a.data_nasc)}
+            </div>
+        `;
+    });
+}
+
+
+function abrirModal(id, nome, bairro, contato) {
+    modalEditar.style.display = "flex";
+    edit_id.value = id;
+    edit_nome.value = nome;
+    edit_bairro.value = bairro;
+    edit_contato.value = contato;
+}
+
+function fecharModal() {
+    modalEditar.style.display = "none";
+}
+
+async function salvarEdicao() {
+    const id = edit_id.value;
+
+    const dadosAtualizados = {
+        nome: edit_nome.value,
+        contato: edit_contato.value,
+        endereco: {
+            bairro: edit_bairro.value
+        }
+    };
+
+    await fetch(API + "/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dadosAtualizados)
+    });
+
+    fecharModal();
+    listarTodos();
+}
+
+async function deletar(id) {
+    if (!confirm("Deseja realmente excluir?")) return;
+
+    await fetch(API + "/" + id, { method: "DELETE" });
+    listarTodos();
+}
 </script>
 
 </body>
