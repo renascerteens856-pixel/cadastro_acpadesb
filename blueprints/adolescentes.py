@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from sistemacomercial_sis22_libertas_python.db_config import connect_db
-from sistemacomercial_sis22_libertas_python.adolescente import Adolescente   # importa o modelo (Pydantic ou Dataclass)
+from db_config import connect_db
+from adolescente import Adolescente   # importa o modelo (Pydantic ou Dataclass)
 
 adolescentes_bp = Blueprint("adolescentes", __name__)
 
