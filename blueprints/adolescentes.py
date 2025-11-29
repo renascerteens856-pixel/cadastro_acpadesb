@@ -41,10 +41,21 @@ def cadastrar():
 def listar_todos():
     try:
         supabase = connect_db()
-        response = supabase.table("adolescentes").select("*").order("id", desc=True).execute()
-        if response.error:
-            return jsonify({"erro": response.error.message}), 500
-        return jsonify(response.data), 200
+
+        response = (
+            supabase
+                .table("adolescentes")
+                .select("*")
+                .order("id", desc=True)
+                .execute()
+        )
+
+        # Supabase v2 retorna dict
+        if response.get("error"):
+            return jsonify({"erro": response["error"]["message"]}), 500
+
+        return jsonify(response.get("data", [])), 200
+
     except Exception as e:
         return jsonify({"erro": "Erro ao listar todos", "detalhes": str(e)}), 500
 
