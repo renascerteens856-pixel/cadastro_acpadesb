@@ -1,5 +1,5 @@
 Flask>=2.2
-psycopg2-binary
-python-dotenv
+supabase
+gunicorn
 Flask-Cors
 
