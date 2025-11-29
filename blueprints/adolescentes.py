@@ -47,50 +47,28 @@ def cadastrar():
 
 
 # ===========================
-#      LISTAR (GET)
+#    GET SIMPLES (LISTAR TUDO)
 # ===========================
-@adolescentes_bp.get("/")
-def listar():
+@adolescentes_bp.get("/todos")
+def listar_todos():
     try:
-        pagina = int(request.args.get("pagina", 1))
-        limite = int(request.args.get("limite", 20))
-        ordenar_por = request.args.get("ordenar_por", "id")
-        ordem = request.args.get("ordem", "desc")
-
         supabase = connect_db()
 
-        filtro_nome = request.args.get("nome")
-        filtro_bairro = request.args.get("bairro")
-
-        query = supabase.table("adolescentes").select("*")
-
-        if filtro_nome:
-            query = query.ilike("nome", f"%{filtro_nome}%")
-
-        if filtro_bairro:
-            query = query.ilike("endereco->>bairro", f"%{filtro_bairro}%")
-
-        query = query.order(ordenar_por, desc=(ordem == "desc"))
-
-        inicio = (pagina - 1) * limite
-        fim = inicio + limite - 1
-
-        query = query.range(inicio, fim)
-
-        response = query.execute()
+        response = (
+            supabase.table("adolescentes")
+            .select("*")
+            .order("id", desc=True)
+            .execute()
+        )
 
         if response.error:
             return jsonify({"erro": response.error.message}), 500
 
-        return jsonify({
-            "pagina": pagina,
-            "limite": limite,
-            "total": len(response.data),
-            "dados": response.data
-        }), 200
+        return jsonify(response.data), 200
 
     except Exception as e:
-        return jsonify({"erro": "Falha ao listar adolescentes", "detalhes": str(e)}), 500
+        return jsonify({"erro": "Erro ao listar todos", "detalhes": str(e)}), 500
+
 
 
 
