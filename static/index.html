@@ -127,23 +127,15 @@
     <script>
         const API_URL = "https://cadastro-adolescentes.onrender.com/adolescentes/";
 
-        // Base64 do logo para impressão (substitua conforme sua logo)
-        const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAYAAACpt04RAAAAAXNSR0IArs4c6QAAAQ1JREFUeF7t0jEOgCAMRFGRqvL2e+GJQAZh3qW4NFDfuIlmLTPF9RAAAAAAAAAAAAXp5nl/rILszwZ+59VxvWnPXvWgOsxW1fW7Q3lnMHZ+osKp4V+3wzPWe2b8q88w1Fp9r9w1GeTzveE2a8aU3w57/j/ehqLu+9F9+G9No87tZ/5h5WmwJAAAAAAAAAAAAwG+AtgDa3uw8kMZ5bkAAAAASUVORK5CYII=";
-
         function formatarDataBR(dataIso) {
             if (!dataIso) return "";
-            // Corrige problema de timezone "voltar um dia"
             const data = new Date(dataIso + "T00:00:00Z");
-            const dia = String(data.getUTCDate()).padStart(2, "0");
-            const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
-            const ano = data.getUTCFullYear();
-            return `${dia}/${mes}/${ano}`;
+            return `${String(data.getUTCDate()).padStart(2, "0")}/${String(data.getUTCMonth() + 1).padStart(2, "0")}/${data.getUTCFullYear()}`;
         }
 
         async function listarAdolescentes() {
             try {
                 const res = await fetch(API_URL);
-                if (!res.ok) throw new Error("Erro ao listar adolescentes");
                 const dados = await res.json();
 
                 const tbody = document.getElementById("lista-adolescentes");
@@ -168,44 +160,30 @@
                     tbody.appendChild(tr);
                 });
 
-                document.querySelectorAll(".btn-editar").forEach((btn) => {
-                    btn.onclick = () => carregarParaEditar(btn.dataset.id);
-                });
-                document.querySelectorAll(".btn-excluir").forEach((btn) => {
-                    btn.onclick = () => excluirAdolescente(btn.dataset.id);
-                });
-                document.querySelectorAll(".btn-imprimir").forEach((btn) => {
-                    btn.onclick = () => imprimirAdolescente(btn.dataset.id);
-                });
+                document.querySelectorAll(".btn-editar").forEach(btn => btn.onclick = () => carregarParaEditar(btn.dataset.id));
+                document.querySelectorAll(".btn-excluir").forEach(btn => btn.onclick = () => excluirAdolescente(btn.dataset.id));
+                document.querySelectorAll(".btn-imprimir").forEach(btn => btn.onclick = () => imprimirAdolescente(btn.dataset.id));
+
             } catch (error) {
                 alert(error.message);
             }
         }
 
         async function carregarParaEditar(id) {
-            try {
-                const res = await fetch(API_URL + id);
-                if (!res.ok) throw new Error("Erro ao carregar adolescente");
-                const item = await res.json();
+            const res = await fetch(API_URL + id);
+            const item = await res.json();
 
-                document.getElementById("editandoId").value = item.id;
-                document.getElementById("nome").value = item.nome;
-                document.getElementById("nome_pai").value = item.nome_pai || "";
-                document.getElementById("nome_mae").value = item.nome_mae || "";
-                document.getElementById("contato").value = item.contato || "";
-                document.getElementById("data_nasc").value = item.data_nasc || "";
-                document.getElementById("rua").value = item.endereco?.rua || "";
-                document.getElementById("numero").value = item.endereco?.numero || "";
-                document.getElementById("bairro").value = item.endereco?.bairro || "";
+            document.getElementById("editandoId").value = item.id;
+            document.getElementById("nome").value = item.nome;
+            document.getElementById("nome_pai").value = item.nome_pai || "";
+            document.getElementById("nome_mae").value = item.nome_mae || "";
+            document.getElementById("contato").value = item.contato || "";
+            document.getElementById("data_nasc").value = item.data_nasc || "";
+            document.getElementById("rua").value = item.endereco?.rua || "";
+            document.getElementById("numero").value = item.endereco?.numero || "";
+            document.getElementById("bairro").value = item.endereco?.bairro || "";
 
-                document.getElementById("modalCadastroLabel").textContent = "Editar Adolescente";
-
-                const modalEl = document.getElementById("modalCadastro");
-                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                modal.show();
-            } catch (error) {
-                alert(error.message);
-            }
+            new bootstrap.Modal(document.getElementById("modalCadastro")).show();
         }
 
         document.getElementById("btnNovo").onclick = () => {
@@ -222,122 +200,62 @@
             const url = id ? API_URL + id : API_URL;
 
             const data = {
-                nome: document.getElementById("nome").value.trim(),
-                nome_pai: document.getElementById("nome_pai").value.trim(),
-                nome_mae: document.getElementById("nome_mae").value.trim(),
-                contato: document.getElementById("contato").value.trim(),
-                data_nasc: document.getElementById("data_nasc").value || null,
+                nome: nome.value.trim(),
+                nome_pai: nome_pai.value.trim(),
+                nome_mae: nome_mae.value.trim(),
+                contato: contato.value.trim(),
+                data_nasc: data_nasc.value || null,
                 endereco: {
-                    rua: document.getElementById("rua").value.trim(),
-                    numero: document.getElementById("numero").value.trim(),
-                    bairro: document.getElementById("bairro").value.trim(),
+                    rua: rua.value.trim(),
+                    numero: numero.value.trim(),
+                    bairro: bairro.value.trim(),
                 },
             };
 
-            try {
-                const res = await fetch(url, {
-                    method: metodo,
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data),
-                });
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.erro || "Erro ao salvar");
-                }
+            await fetch(url, {
+                method: metodo,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
 
-                const modalEl = document.getElementById("modalCadastro");
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-
-                listarAdolescentes();
-            } catch (error) {
-                alert(error.message);
-            }
+            bootstrap.Modal.getInstance(document.getElementById("modalCadastro")).hide();
+            listarAdolescentes();
         };
 
         async function excluirAdolescente(id) {
             if (!confirm("Confirma exclusão?")) return;
-
-            try {
-                const res = await fetch(API_URL + id, { method: "DELETE" });
-                if (!res.ok) throw new Error("Erro ao excluir");
-
-                listarAdolescentes();
-            } catch (error) {
-                alert(error.message);
-            }
+            await fetch(API_URL + id, { method: "DELETE" });
+            listarAdolescentes();
         }
 
         async function imprimirAdolescente(id) {
-            try {
-                const res = await fetch(API_URL + id);
-                if (!res.ok) throw new Error("Erro ao carregar adolescente para impressão");
-                const item = await res.json();
+            const res = await fetch(API_URL + id);
+            const item = await res.json();
 
-                const conteudo = `
-                    <div style="text-align:center; margin-bottom:20px;">
-                        <img src="static/Images/logo_adolescentes.PNG" alt="Logo" style="max-width:150px;" />
-                    </div>
-                    <h2 style="text-align:center; margin-bottom: 20px;">Ficha do Adolescente</h2>
-                    <table border="1" cellspacing="0" cellpadding="8" style="width:100%; border-collapse: collapse; font-family: Arial, sans-serif;">
-                        <tbody>
-                            <tr>
-                                <th align="left">ID</th>
-                                <td>${item.id}</td>
-                            </tr>
-                            <tr>
-                                <th align="left">Nome</th>
-                                <td>${item.nome}</td>
-                            </tr>
-                            <tr>
-                                <th align="left">Nome do Pai</th>
-                                <td>${item.nome_pai || "-"}</td>
-                            </tr>
-                            <tr>
-                                <th align="left">Nome da Mãe</th>
-                                <td>${item.nome_mae || "-"}</td>
-                            </tr>
-                            <tr>
-                                <th align="left">Contato</th>
-                                <td>${item.contato || "-"}</td>
-                            </tr>
-                            <tr>
-                                <th align="left">Data de Nascimento</th>
-                                <td>${formatarDataBR(item.data_nasc)}</td>
-                            </tr>
-                            <tr>
-                                <th align="left">Endereço</th>
-                                <td>${item.endereco?.rua || "-"}, ${item.endereco?.numero || "-"}, ${item.endereco?.bairro || "-"}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                `;
+            const conteudo = `
+                <div style="text-align:center; margin-bottom:20px;">
+                    <img src="static/Images/logo_adolescentes.PNG" style="max-width:150px;" />
+                </div>
 
-                const printWindow = window.open("", "", "width=600,height=700");
-                printWindow.document.write(`
-                    <html>
-                    <head>
-                        <title>Ficha Adolescente</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 30px; }
-                            h2 { text-align: center; margin-bottom: 20px; }
-                            table { border-collapse: collapse; width: 100%; }
-                            th, td { border: 1px solid #000; padding: 8px; }
-                            th { background-color: #f0f0f0; text-align: left; }
-                        </style>
-                    </head>
-                    <body>
-                        ${conteudo}
-                    </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
-                printWindow.close();
-            } catch (error) {
-                alert(error.message);
-            }
+                <h2 style="text-align:center; margin-bottom:20px;">Ficha do Adolescente</h2>
+
+                <table border="1" cellspacing="0" cellpadding="8" style="width:100%; border-collapse: collapse;">
+                    <tr><th align="left">Nome</th><td>${item.nome}</td></tr>
+                    <tr><th align="left">Nome do Pai</th><td>${item.nome_pai || "-"}</td></tr>
+                    <tr><th align="left">Nome da Mãe</th><td>${item.nome_mae || "-"}</td></tr>
+                    <tr><th align="left">Contato</th><td>${item.contato || "-"}</td></tr>
+                    <tr><th align="left">Data de Nascimento</th><td>${formatarDataBR(item.data_nasc)}</td></tr>
+                    <tr><th align="left">Endereço</th><td>${item.endereco?.rua || "-"}, ${item.endereco?.numero || "-"}, ${item.endereco?.bairro || "-"}</td></tr>
+                </table>
+            `;
+
+            const w = window.open("", "", "width=600,height=700");
+            w.document.write(`
+                <html><head><title>Ficha</title></head>
+                <body>${conteudo}</body></html>
+            `);
+            w.document.close();
+            w.print();
         }
 
         document.addEventListener("DOMContentLoaded", listarAdolescentes);
