@@ -33,82 +33,84 @@
         <div class="card shadow">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Lista de Adolescentes</h4>
-                <button class="btn btn-success" id="btnNovo" data-bs-toggle="modal" data-bs-target="#modalCadastro">Novo Adolescente</button>
+                <button class="btn btn-success" id="btnNovo" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+                    Novo Adolescente
+                </button>
             </div>
 
             <div class="card-body">
                 <table class="table table-bordered table-striped text-center align-middle" id="tabela">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Nome</th>
                             <th>Pai</th>
                             <th>Mãe</th>
                             <th>Contato</th>
                             <th>Data Nasc.</th>
-                            <th>Endereço (Rua, Nº, Bairro)</th>
+                            <th>Endereço</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="lista-adolescentes">
-                        <!-- Conteúdo carregado pela API -->
+                        <!-- Conteúdo da API -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Modal Cadastro / Edição -->
-    <div class="modal fade" id="modalCadastro" tabindex="-1" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+    <!-- Modal -->
+    <div class="modal fade" id="modalCadastro" tabindex="-1">
         <div class="modal-dialog">
             <form id="formCadastro" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalCadastroLabel">Cadastrar Adolescente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
                     <input type="hidden" id="editandoId" />
 
                     <div class="mb-3">
-                        <label for="nome" class="form-label">Nome *</label>
+                        <label class="form-label">Nome *</label>
+                        
                         <input type="text" id="nome" class="form-control" required />
                     </div>
 
                     <div class="mb-3">
-                        <label for="nome_pai" class="form-label">Nome do Pai</label>
+                        <label class="form-label">Nome do Pai</label>
                         <input type="text" id="nome_pai" class="form-control" />
                     </div>
 
                     <div class="mb-3">
-                        <label for="nome_mae" class="form-label">Nome da Mãe</label>
+                        <label class="form-label">Nome da Mãe</label>
                         <input type="text" id="nome_mae" class="form-control" />
                     </div>
 
                     <div class="mb-3">
-                        <label for="contato" class="form-label">Contato</label>
+                        <label class="form-label">Contato</label>
                         <input type="text" id="contato" class="form-control" />
                     </div>
 
                     <div class="mb-3">
-                        <label for="data_nasc" class="form-label">Data de Nascimento</label>
+                        <label class="form-label">Data de Nascimento</label>
                         <input type="date" id="data_nasc" class="form-control" />
                     </div>
 
                     <h6>Endereço</h6>
 
                     <div class="mb-3">
-                        <label for="rua" class="form-label">Rua</label>
+                        <label class="form-label">Rua</label>
                         <input type="text" id="rua" class="form-control" />
                     </div>
 
                     <div class="mb-3">
-                        <label for="numero" class="form-label">Número</label>
+                        <label class="form-label">Número</label>
                         <input type="text" id="numero" class="form-control" />
                     </div>
 
                     <div class="mb-3">
-                        <label for="bairro" class="form-label">Bairro</label>
+                        <label class="form-label">Bairro</label>
                         <input type="text" id="bairro" class="form-control" />
                     </div>
                 </div>
@@ -121,7 +123,7 @@
         </div>
     </div>
 
-    <!-- Bootstrap Bundle JS -->
+    <!-- Bootstrap Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -129,77 +131,76 @@
 
         function formatarDataBR(dataIso) {
             if (!dataIso) return "";
-            const data = new Date(dataIso + "T00:00:00Z");
-            return `${String(data.getUTCDate()).padStart(2, "0")}/${String(data.getUTCMonth() + 1).padStart(2, "0")}/${data.getUTCFullYear()}`;
+            const d = new Date(dataIso + "T00:00");
+            return d.toLocaleDateString("pt-BR");
         }
 
         async function listarAdolescentes() {
-            try {
-                const res = await fetch(API_URL);
-                const dados = await res.json();
+            const res = await fetch(API_URL);
+            const dados = await res.json();
 
-                const tbody = document.getElementById("lista-adolescentes");
-                tbody.innerHTML = "";
+            const tbody = document.getElementById("lista-adolescentes");
+            tbody.innerHTML = "";
 
-                dados.forEach((item) => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${item.id}</td>
-                        <td>${item.nome}</td>
-                        <td>${item.nome_pai || "-"}</td>
-                        <td>${item.nome_mae || "-"}</td>
-                        <td>${item.contato || "-"}</td>
-                        <td>${formatarDataBR(item.data_nasc)}</td>
-                        <td>${item.endereco?.rua || "-"}, ${item.endereco?.numero || "-"}, ${item.endereco?.bairro || "-"}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary btn-editar" data-id="${item.id}">Editar</button>
-                            <button class="btn btn-sm btn-danger btn-excluir" data-id="${item.id}">Excluir</button>
-                            <button class="btn btn-sm btn-secondary btn-imprimir" data-id="${item.id}">Imprimir</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            dados.forEach(item => {
+                const tr = document.createElement("tr");
 
-                document.querySelectorAll(".btn-editar").forEach(btn => btn.onclick = () => carregarParaEditar(btn.dataset.id));
-                document.querySelectorAll(".btn-excluir").forEach(btn => btn.onclick = () => excluirAdolescente(btn.dataset.id));
-                document.querySelectorAll(".btn-imprimir").forEach(btn => btn.onclick = () => imprimirAdolescente(btn.dataset.id));
+                tr.innerHTML = `
+                    <td>${item.nome}</td>
+                    <td>${item.nome_pai || "-"}</td>
+                    <td>${item.nome_mae || "-"}</td>
+                    <td>${item.contato || "-"}</td>
+                    <td>${formatarDataBR(item.data_nasc)}</td>
+                    <td>${item.endereco?.rua || "-"}, ${item.endereco?.numero || "-"}, ${item.endereco?.bairro || "-"}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary btn-editar" data-id="${item.id}">Editar</button>
+                        <button class="btn btn-sm btn-danger btn-excluir" data-id="${item.id}">Excluir</button>
+                        <button class="btn btn-sm btn-secondary btn-imprimir" data-id="${item.id}">Imprimir</button>
+                    </td>
+                `;
 
-            } catch (error) {
-                alert(error.message);
-            }
+                tbody.appendChild(tr);
+            });
+
+            document.querySelectorAll(".btn-editar").forEach(btn =>
+                btn.onclick = () => carregarParaEditar(btn.dataset.id)
+            );
+
+            document.querySelectorAll(".btn-excluir").forEach(btn =>
+                btn.onclick = () => excluirAdolescente(btn.dataset.id)
+            );
+
+            document.querySelectorAll(".btn-imprimir").forEach(btn =>
+                btn.onclick = () => imprimirAdolescente(btn.dataset.id)
+            );
         }
 
         async function carregarParaEditar(id) {
             const res = await fetch(API_URL + id);
-            const item = await res.json();
+            const a = await res.json();
 
-            document.getElementById("editandoId").value = item.id;
-            document.getElementById("nome").value = item.nome;
-            document.getElementById("nome_pai").value = item.nome_pai || "";
-            document.getElementById("nome_mae").value = item.nome_mae || "";
-            document.getElementById("contato").value = item.contato || "";
-            document.getElementById("data_nasc").value = item.data_nasc || "";
-            document.getElementById("rua").value = item.endereco?.rua || "";
-            document.getElementById("numero").value = item.endereco?.numero || "";
-            document.getElementById("bairro").value = item.endereco?.bairro || "";
+            editandoId.value = a.id;
+            nome.value = a.nome;
+            nome_pai.value = a.nome_pai || "";
+            nome_mae.value = a.nome_mae || "";
+            contato.value = a.contato || "";
+            data_nasc.value = a.data_nasc || "";
 
-            new bootstrap.Modal(document.getElementById("modalCadastro")).show();
+            rua.value = a.endereco?.rua || "";
+            numero.value = a.endereco?.numero || "";
+            bairro.value = a.endereco?.bairro || "";
+
+            new bootstrap.Modal("#modalCadastro").show();
         }
 
-        document.getElementById("btnNovo").onclick = () => {
-            document.getElementById("formCadastro").reset();
-            document.getElementById("editandoId").value = "";
-            document.getElementById("modalCadastroLabel").textContent = "Cadastrar Adolescente";
-        };
-
-        document.getElementById("formCadastro").onsubmit = async function (e) {
+        formCadastro.onsubmit = async e => {
             e.preventDefault();
 
-            const id = document.getElementById("editandoId").value;
+            const id = editandoId.value;
             const metodo = id ? "PUT" : "POST";
             const url = id ? API_URL + id : API_URL;
 
-            const data = {
+            const payload = {
                 nome: nome.value.trim(),
                 nome_pai: nome_pai.value.trim(),
                 nome_mae: nome_mae.value.trim(),
@@ -208,14 +209,14 @@
                 endereco: {
                     rua: rua.value.trim(),
                     numero: numero.value.trim(),
-                    bairro: bairro.value.trim(),
-                },
+                    bairro: bairro.value.trim()
+                }
             };
 
             await fetch(url, {
                 method: metodo,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                body: JSON.stringify(payload)
             });
 
             bootstrap.Modal.getInstance(document.getElementById("modalCadastro")).hide();
@@ -223,7 +224,8 @@
         };
 
         async function excluirAdolescente(id) {
-            if (!confirm("Confirma exclusão?")) return;
+            if (!confirm("Deseja realmente excluir?")) return;
+
             await fetch(API_URL + id, { method: "DELETE" });
             listarAdolescentes();
         }
@@ -234,10 +236,10 @@
 
             const conteudo = `
                 <div style="text-align:center; margin-bottom:20px;">
-                    <img src="static/Images/logo_adolescentes.PNG" style="max-width:150px;" />
+                    <img src="static/Images/logo_adolescentes.PNG" style="max-width:150px;">
                 </div>
 
-                <h2 style="text-align:center; margin-bottom:20px;">Ficha do Adolescente</h2>
+                <h2 style="text-align:center;">Ficha do Adolescente</h2>
 
                 <table border="1" cellspacing="0" cellpadding="8" style="width:100%; border-collapse: collapse;">
                     <tr><th align="left">Nome</th><td>${item.nome}</td></tr>
@@ -250,10 +252,7 @@
             `;
 
             const w = window.open("", "", "width=600,height=700");
-            w.document.write(`
-                <html><head><title>Ficha</title></head>
-                <body>${conteudo}</body></html>
-            `);
+            w.document.write(`<html><body>${conteudo}</body></html>`);
             w.document.close();
             w.print();
         }
@@ -261,5 +260,4 @@
         document.addEventListener("DOMContentLoaded", listarAdolescentes);
     </script>
 </body>
-
 </html>
