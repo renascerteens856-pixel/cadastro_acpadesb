@@ -43,7 +43,7 @@ def normalizar_adolescente(item):
 @adolescentes_bp.route("/", methods=["GET"])
 def listar():
     try:
-        response = supabase.table(TABELA).select("*").order("id").execute()
+        response = supabase.table(TABELA).select("*").order("id", desc=False).execute()
 
         dados = response.data or []
 
