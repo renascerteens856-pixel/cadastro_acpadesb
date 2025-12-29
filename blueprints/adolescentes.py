@@ -1,85 +1,173 @@
-# adolescentes.py
 from flask import Blueprint, request, jsonify
-from db_config import connect_db
+from supabase import create_client
 
-# ======================================================================
-# CONFIGURAÇÃO DIRETA (sem .env)
-# ======================================================================
-      # service_role ou anon com policies liberadas
+# =========================
+# CONFIGURAÇÃO SUPABASE
+# =========================
+SUPABASE_URL = "https://SEU_PROJETO.supabase.co"
+SUPABASE_KEY = "SUA_SERVICE_ROLE_OU_ANON_KEY"
 
-supabase = connect_db()
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 adolescentes_bp = Blueprint("adolescentes", __name__, url_prefix="/adolescentes")
 
-# ======================================================================
-# LISTAR TODOS
-# ======================================================================
-@adolescentes_bp.get("/")
+TABELA = "adolescentes"
+
+
+# =========================
+# FUNÇÃO AUXILIAR
+# =========================
+def normalizar_adolescente(item):
+    """
+    Garante que o JSON retornado
+    esteja sempre no formato esperado pelo frontend
+    """
+    return {
+        "id": item.get("id"),
+        "nome": item.get("nome"),
+        "nome_pai": item.get("nome_pai"),
+        "nome_mae": item.get("nome_mae"),
+        "contato": item.get("contato"),
+        "data_nasc": item.get("data_nasc"),
+        "endereco": item.get("endereco") or {
+            "rua": "",
+            "numero": "",
+            "bairro": ""
+        }
+    }
+
+
+# =========================
+# LISTAR TODOS (GET)
+# =========================
+@adolescentes_bp.route("/", methods=["GET"])
 def listar():
     try:
-        resp = supabase.table("adolescentes").select("*").execute()
-        return jsonify(resp.data), 200
+        response = supabase.table(TABELA).select("*").order("id").execute()
+
+        dados = response.data or []
+
+        # SEMPRE retorna array
+        adolescentes = [normalizar_adolescente(item) for item in dados]
+
+        return jsonify(adolescentes), 200
+
     except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+        return jsonify({
+            "erro": "Erro ao listar adolescentes",
+            "detalhes": str(e)
+        }), 500
 
 
-# ======================================================================
-# BUSCAR 1
-# ======================================================================
-@adolescentes_bp.get("/<int:id>")
-def buscar(id):
+# =========================
+# BUSCAR POR ID (GET)
+# =========================
+@adolescentes_bp.route("/<int:id>", methods=["GET"])
+def buscar_por_id(id):
     try:
-        resp = supabase.table("adolescentes").select("*").eq("id", id).single().execute()
-        return jsonify(resp.data), 200
+        response = (
+            supabase
+            .table(TABELA)
+            .select("*")
+            .eq("id", id)
+            .single()
+            .execute()
+        )
+
+        if not response.data:
+            return jsonify({"erro": "Adolescente não encontrado"}), 404
+
+        return jsonify(normalizar_adolescente(response.data)), 200
+
     except Exception as e:
-        return jsonify({"erro": "Não encontrado", "detalhes": str(e)}), 404
+        return jsonify({
+            "erro": "Erro ao buscar adolescente",
+            "detalhes": str(e)
+        }), 500
 
 
-# ======================================================================
-# CADASTRAR
-# ======================================================================
-@adolescentes_bp.post("/")
+# =========================
+# CADASTRAR (POST)
+# =========================
+@adolescentes_bp.route("/", methods=["POST"])
 def cadastrar():
-    data = request.get_json()
-
-    if not data or "nome" not in data:
-        return jsonify({"erro": "campo 'nome' é obrigatório"}), 400
-
     try:
-        resp = supabase.table("adolescentes").insert(data).execute()
-        return jsonify(resp.data[0]), 201
+        data = request.json or {}
+
+        novo = {
+            "nome": data.get("nome"),
+            "nome_pai": data.get("nome_pai"),
+            "nome_mae": data.get("nome_mae"),
+            "contato": data.get("contato"),
+            "data_nasc": data.get("data_nasc"),
+            "endereco": data.get("endereco") or {
+                "rua": "",
+                "numero": "",
+                "bairro": ""
+            }
+        }
+
+        response = supabase.table(TABELA).insert(novo).execute()
+
+        return jsonify({
+            "mensagem": "Adolescente cadastrado com sucesso"
+        }), 201
+
     except Exception as e:
-        return jsonify({"erro": "Erro ao inserir", "detalhes": str(e)}), 500
+        return jsonify({
+            "erro": "Erro ao cadastrar adolescente",
+            "detalhes": str(e)
+        }), 500
 
 
-# ======================================================================
-# ATUALIZAR
-# ======================================================================
-@adolescentes_bp.put("/<int:id>")
+# =========================
+# ATUALIZAR (PUT)
+# =========================
+@adolescentes_bp.route("/<int:id>", methods=["PUT"])
 def atualizar(id):
-    data = request.get_json()
-
     try:
-        resp = supabase.table("adolescentes").update(data).eq("id", id).execute()
-        if not resp.data:
-            return jsonify({"erro": "Adolescente não encontrado"}), 404
-        return jsonify(resp.data[0]), 200
+        data = request.json or {}
+
+        atualizado = {
+            "nome": data.get("nome"),
+            "nome_pai": data.get("nome_pai"),
+            "nome_mae": data.get("nome_mae"),
+            "contato": data.get("contato"),
+            "data_nasc": data.get("data_nasc"),
+            "endereco": data.get("endereco") or {
+                "rua": "",
+                "numero": "",
+                "bairro": ""
+            }
+        }
+
+        supabase.table(TABELA).update(atualizado).eq("id", id).execute()
+
+        return jsonify({
+            "mensagem": "Adolescente atualizado com sucesso"
+        }), 200
 
     except Exception as e:
-        return jsonify({"erro": "Erro ao atualizar", "detalhes": str(e)}), 500
+        return jsonify({
+            "erro": "Erro ao atualizar adolescente",
+            "detalhes": str(e)
+        }), 500
 
 
-# ======================================================================
-# DELETAR
-# ======================================================================
-@adolescentes_bp.delete("/<int:id>")
-def deletar(id):
+# =========================
+# EXCLUIR (DELETE)
+# =========================
+@adolescentes_bp.route("/<int:id>", methods=["DELETE"])
+def excluir(id):
     try:
-        resp = supabase.table("adolescentes").delete().eq("id", id).execute()
-        if not resp.data:
-            return jsonify({"erro": "Adolescente não encontrado"}), 404
+        supabase.table(TABELA).delete().eq("id", id).execute()
 
-        return jsonify({"ok": True}), 200
+        return jsonify({
+            "mensagem": "Adolescente excluído com sucesso"
+        }), 200
 
     except Exception as e:
-        return jsonify({"erro": "Erro ao deletar", "detalhes": str(e)}), 500
+        return jsonify({
+            "erro": "Erro ao excluir adolescente",
+            "detalhes": str(e)
+        }), 500
