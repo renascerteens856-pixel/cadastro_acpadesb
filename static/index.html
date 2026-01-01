@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>ACPADESB</title>
+<meta charset="UTF-8">
+<title>ACPADESB</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        body { background:#f4f4f4; }
-        #logoTopo { display:block; margin:20px auto; max-width:220px; }
-        .card { margin-top:20px; }
-        table th, table td { text-align:center; vertical-align:middle; }
-    </style>
+<style>
+body { background:#f4f4f4; }
+#logoTopo { display:block; margin:20px auto; max-width:220px; }
+.card { margin-top:20px; }
+th, td { text-align:center; vertical-align:middle; font-size:14px; }
+</style>
 </head>
 
 <body>
@@ -21,39 +21,41 @@
 <div class="container">
 
 <ul class="nav nav-tabs">
-    <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#abaAdolescentes">
-            Adolescentes
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#abaCongregacoes">
-            Congregações
-        </button>
-    </li>
+  <li class="nav-item">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabAdolescentes">
+      Adolescentes
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCongregacoes">
+      Congregações
+    </button>
+  </li>
 </ul>
 
 <div class="tab-content">
 
 <!-- ================= ADOLESCENTES ================= -->
-<div class="tab-pane fade show active" id="abaAdolescentes">
+<div class="tab-pane fade show active" id="tabAdolescentes">
 <div class="card shadow">
-
 <div class="card-header d-flex justify-content-between">
-    <h5>Adolescentes</h5>
-    <button class="btn btn-success" onclick="novoAdolescente()">Novo</button>
+  <h5>Adolescentes</h5>
+  <button class="btn btn-success" onclick="novoAdolescente()">Novo</button>
 </div>
 
-<div class="card-body">
+<div class="card-body table-responsive">
 <table class="table table-bordered table-striped">
 <thead class="table-dark">
 <tr>
-    <th>Nome</th>
-    <th>CPF</th>
-    <th>Contato</th>
-    <th>Data</th>
-    <th>Congregação</th>
-    <th>Ações</th>
+  <th>Nome</th>
+  <th>Pai</th>
+  <th>Mãe</th>
+  <th>CPF</th>
+  <th>Contato</th>
+  <th>Nascimento</th>
+  <th>Congregação</th>
+  <th>Endereço</th>
+  <th>Ações</th>
 </tr>
 </thead>
 <tbody id="listaAdolescentes"></tbody>
@@ -63,20 +65,19 @@
 </div>
 
 <!-- ================= CONGREGAÇÕES ================= -->
-<div class="tab-pane fade" id="abaCongregacoes">
+<div class="tab-pane fade" id="tabCongregacoes">
 <div class="card shadow">
-
 <div class="card-header d-flex justify-content-between">
-    <h5>Congregações</h5>
-    <button class="btn btn-success" onclick="novaCongregacao()">Nova</button>
+  <h5>Congregações</h5>
+  <button class="btn btn-success" onclick="novaCongregacao()">Nova</button>
 </div>
 
 <div class="card-body">
 <table class="table table-bordered table-striped">
 <thead class="table-dark">
 <tr>
-    <th>Nome</th>
-    <th>Ações</th>
+  <th>Nome</th>
+  <th>Ações</th>
 </tr>
 </thead>
 <tbody id="listaCongregacoes"></tbody>
@@ -90,29 +91,49 @@
 
 <!-- ================= MODAL ADOLESCENTE ================= -->
 <div class="modal fade" id="modalAdolescente">
-<div class="modal-dialog">
+<div class="modal-dialog modal-lg">
 <form class="modal-content" onsubmit="salvarAdolescente(event)">
-
 <div class="modal-header">
-    <h5 id="tituloAdolescente"></h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <h5 id="tituloAdolescente"></h5>
+  <button class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 
 <div class="modal-body">
 <input type="hidden" id="adolescenteId">
 
-<input class="form-control mb-2" id="nome" placeholder="Nome" required>
-<input class="form-control mb-2" id="cpf" placeholder="CPF">
-<input class="form-control mb-2" id="contato" placeholder="Contato">
-<input type="date" class="form-control mb-2" id="data_nasc">
+<div class="row">
+  <div class="col-md-6 mb-2"><input class="form-control" id="nome" placeholder="Nome" required></div>
+  <div class="col-md-6 mb-2"><input class="form-control" id="cpf" placeholder="CPF"></div>
+</div>
 
-<select class="form-control mb-2" id="congregacao"></select>
+<div class="row">
+  <div class="col-md-6 mb-2"><input class="form-control" id="nome_pai" placeholder="Nome do Pai"></div>
+  <div class="col-md-6 mb-2"><input class="form-control" id="nome_mae" placeholder="Nome da Mãe"></div>
+</div>
+
+<div class="row">
+  <div class="col-md-6 mb-2"><input class="form-control" id="contato" placeholder="Contato"></div>
+  <div class="col-md-6 mb-2"><input type="date" class="form-control" id="data_nasc"></div>
+</div>
+
+<div class="mb-2">
+  <label>Congregação</label>
+  <select class="form-select" id="congregacao" required></select>
+</div>
+
+<hr>
+<h6>Endereço</h6>
+
+<div class="row">
+  <div class="col-md-6 mb-2"><input class="form-control" id="rua" placeholder="Rua"></div>
+  <div class="col-md-3 mb-2"><input class="form-control" id="numero" placeholder="Número"></div>
+  <div class="col-md-3 mb-2"><input class="form-control" id="bairro" placeholder="Bairro"></div>
+</div>
 </div>
 
 <div class="modal-footer">
-<button class="btn btn-primary" type="submit">Salvar</button>
+  <button class="btn btn-primary" type="submit">Salvar</button>
 </div>
-
 </form>
 </div>
 </div>
@@ -121,21 +142,19 @@
 <div class="modal fade" id="modalCongregacao">
 <div class="modal-dialog">
 <form class="modal-content" onsubmit="salvarCongregacao(event)">
-
 <div class="modal-header">
-    <h5 id="tituloCongregacao"></h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <h5 id="tituloCongregacao"></h5>
+  <button class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 
 <div class="modal-body">
 <input type="hidden" id="congregacaoId">
-<input class="form-control" id="congregacaoNome" placeholder="Nome" required>
+<input class="form-control" id="congregacaoNome" placeholder="Nome da Congregação" required>
 </div>
 
 <div class="modal-footer">
-<button class="btn btn-primary" type="submit">Salvar</button>
+  <button class="btn btn-primary">Salvar</button>
 </div>
-
 </form>
 </div>
 </div>
@@ -143,121 +162,160 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const API_A = "https://cadastro-adolescentes.onrender.com//adolescentes/";
-const API_C = "https://cadastro-adolescentes.onrender.com//congregacoes/";
+const API_A="http://127.0.0.1:5000/adolescentes/";
+const API_C="http://127.0.0.1:5000/congregacoes/";
 
-const modalA = new bootstrap.Modal(document.getElementById("modalAdolescente"));
-const modalC = new bootstrap.Modal(document.getElementById("modalCongregacao"));
+const modalA=new bootstrap.Modal(document.getElementById("modalAdolescente"));
+const modalC=new bootstrap.Modal(document.getElementById("modalCongregacao"));
 
-let mapaCongregacoes = {}; // 🔥 ID -> NOME
-
-const formatarData = d => d ? d.split("-").reverse().join("/") : "";
+let congregacoes=[], mapaCongregacoes={};
 
 /* ================= CONGREGAÇÕES ================= */
-
 async function carregarCongregacoes(){
-    const resp = await fetch(API_C);
-    const dados = await resp.json();
+  const r=await fetch(API_C);
+  congregacoes=await r.json();
 
-    mapaCongregacoes = {};
-    congregacao.innerHTML = "";
+  mapaCongregacoes={};
+  congregacao.innerHTML=`<option value="">Selecione</option>`;
+  listaCongregacoes.innerHTML="";
 
-    dados.forEach(c => {
-        mapaCongregacoes[c.id] = c.nome;
-        congregacao.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
-    });
+  congregacoes.forEach(c=>{
+    mapaCongregacoes[c.id]=c.nome;
+    congregacao.innerHTML+=`<option value="${c.id}">${c.nome}</option>`;
+    listaCongregacoes.innerHTML+=`
+      <tr>
+        <td>${c.nome}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="editarCongregacao(${c.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="excluirCongregacao(${c.id})">Excluir</button>
+        </td>
+      </tr>`;
+  });
+}
 
-    listaCongregacoes.innerHTML = "";
-    dados.forEach(c => {
-        listaCongregacoes.innerHTML += `
-        <tr>
-            <td>${c.nome}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editarCongregacao(${c.id})">Editar</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirCongregacao(${c.id})">Excluir</button>
-            </td>
-        </tr>`;
-    });
+function novaCongregacao(){
+  congregacaoId.value="";
+  congregacaoNome.value="";
+  tituloCongregacao.innerText="Nova Congregação";
+  modalC.show();
+}
+
+function editarCongregacao(id){
+  const c=congregacoes.find(x=>x.id===id);
+  congregacaoId.value=c.id;
+  congregacaoNome.value=c.nome;
+  tituloCongregacao.innerText="Editar Congregação";
+  modalC.show();
+}
+
+async function salvarCongregacao(e){
+  e.preventDefault();
+  const id=congregacaoId.value;
+
+  await fetch(id?API_C+id:API_C,{
+    method:id?"PUT":"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({nome:congregacaoNome.value})
+  });
+
+  modalC.hide();
+  await carregarCongregacoes();
+  listarAdolescentes();
+}
+
+async function excluirCongregacao(id){
+  if(confirm("Excluir congregação?")){
+    await fetch(API_C+id,{method:"DELETE"});
+    await carregarCongregacoes();
+    listarAdolescentes();
+  }
 }
 
 /* ================= ADOLESCENTES ================= */
+async function listarAdolescentes(){
+  const r=await fetch(API_A);
+  const dados=await r.json();
+
+  listaAdolescentes.innerHTML="";
+  dados.forEach(a=>{
+    const e=a.endereco||{};
+    listaAdolescentes.innerHTML+=`
+    <tr>
+      <td>${a.nome}</td>
+      <td>${a.nome_pai||"-"}</td>
+      <td>${a.nome_mae||"-"}</td>
+      <td>${a.cpf||"-"}</td>
+      <td>${a.contato||"-"}</td>
+      <td>${a.data_nasc||"-"}</td>
+      <td>${mapaCongregacoes[a.congregacao]||"-"}</td>
+      <td>${e.rua||""} ${e.numero||""} ${e.bairro||""}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="editarAdolescente(${a.id})">Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="excluirAdolescente(${a.id})">Excluir</button>
+      </td>
+    </tr>`;
+  });
+}
 
 function novoAdolescente(){
-    adolescenteId.value="";
-    document.querySelector("#modalAdolescente form").reset();
-    tituloAdolescente.innerText="Novo Adolescente";
-    modalA.show();
+  document.querySelector("#modalAdolescente form").reset();
+  adolescenteId.value="";
+  tituloAdolescente.innerText="Novo Adolescente";
+  modalA.show();
 }
 
-async function listarAdolescentes(){
-    const resp = await fetch(API_A);
-    const dados = await resp.json();
-
-    listaAdolescentes.innerHTML="";
-
-    dados.forEach(a => {
-        listaAdolescentes.innerHTML += `
-        <tr>
-            <td>${a.nome}</td>
-            <td>${a.cpf || "-"}</td>
-            <td>${a.contato || "-"}</td>
-            <td>${formatarData(a.data_nasc)}</td>
-            <td>${mapaCongregacoes[a.congregacao] || "-"}</td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editarAdolescente(${a.id})">Editar</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirAdolescente(${a.id})">Excluir</button>
-            </td>
-        </tr>`;
-    });
-}
-
-async function salvarAdolescente(e){
-    e.preventDefault();
-    const id = adolescenteId.value;
-
-    await fetch(id ? API_A+id : API_A,{
-        method: id ? "PUT" : "POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            nome:nome.value,
-            cpf:cpf.value,
-            contato:contato.value,
-            data_nasc:data_nasc.value,
-            congregacao:congregacao.value
-        })
-    });
-
-    modalA.hide();
-    listarAdolescentes();
-}
-
-async function editarAdolescente(id){
-    const dados = await (await fetch(API_A)).json();
-    const a = dados.find(x=>x.id===id);
-
-    adolescenteId.value=id;
+function editarAdolescente(id){
+  fetch(API_A).then(r=>r.json()).then(d=>{
+    const a=d.find(x=>x.id===id);
+    adolescenteId.value=a.id;
     nome.value=a.nome;
+    nome_pai.value=a.nome_pai||"";
+    nome_mae.value=a.nome_mae||"";
     cpf.value=a.cpf||"";
     contato.value=a.contato||"";
     data_nasc.value=a.data_nasc||"";
     congregacao.value=a.congregacao;
-
+    rua.value=a.endereco?.rua||"";
+    numero.value=a.endereco?.numero||"";
+    bairro.value=a.endereco?.bairro||"";
     tituloAdolescente.innerText="Editar Adolescente";
     modalA.show();
+  });
+}
+
+async function salvarAdolescente(e){
+  e.preventDefault();
+  const id=adolescenteId.value;
+
+  await fetch(id?API_A+id:API_A,{
+    method:id?"PUT":"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      nome:nome.value,
+      nome_pai:nome_pai.value,
+      nome_mae:nome_mae.value,
+      cpf:cpf.value,
+      contato:contato.value,
+      data_nasc:data_nasc.value,
+      congregacao:parseInt(congregacao.value),
+      endereco:{rua:rua.value,numero:numero.value,bairro:bairro.value}
+    })
+  });
+
+  modalA.hide();
+  listarAdolescentes();
 }
 
 async function excluirAdolescente(id){
-    if(confirm("Excluir adolescente?")){
-        await fetch(API_A+id,{method:"DELETE"});
-        listarAdolescentes();
-    }
+  if(confirm("Excluir adolescente?")){
+    await fetch(API_A+id,{method:"DELETE"});
+    listarAdolescentes();
+  }
 }
 
-/* ================= INIT ================= */
-
-document.addEventListener("DOMContentLoaded", async ()=>{
-    await carregarCongregacoes();   // 🔥 carrega primeiro
-    await listarAdolescentes();     // 🔥 depois lista adolescentes
+document.addEventListener("DOMContentLoaded",async()=>{
+  await carregarCongregacoes();
+  await listarAdolescentes();
 });
 </script>
 
