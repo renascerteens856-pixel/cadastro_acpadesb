@@ -19,7 +19,7 @@ def listar():
             supabase
             .table("adolescentes")
             .select(
-                "id, nome, cpf, contato, data_nasc, congregacao, endereco"
+                "id, nome, nome_pai, nome_mae, cpf, contato, data_nasc, congregacao, endereco"
             )
             .order("nome")
             .execute()
@@ -32,10 +32,12 @@ def listar():
             resultado.append({
                 "id": a.get("id"),
                 "nome": a.get("nome"),
+                "nome_pai": a.get("nome_pai"),
+                "nome_mae": a.get("nome_mae"),
                 "cpf": a.get("cpf"),
                 "contato": a.get("contato"),
                 "data_nasc": a.get("data_nasc"),
-                "congregacao": a.get("congregacao"),  # ✅ AGORA FUNCIONA
+                "congregacao": a.get("congregacao"),
                 "endereco": a.get("endereco") or {}
             })
 
@@ -56,10 +58,12 @@ def cadastrar():
 
         payload = {
             "nome": data.get("nome"),
+            "nome_pai": data.get("nome_pai"),
+            "nome_mae": data.get("nome_mae"),
             "cpf": data.get("cpf"),
             "contato": data.get("contato"),
             "data_nasc": data.get("data_nasc"),
-            "congregacao": data.get("congregacao"),  # string
+            "congregacao": data.get("congregacao"),
             "endereco": data.get("endereco")
         }
 
@@ -86,6 +90,8 @@ def atualizar(id):
 
         payload = {
             "nome": data.get("nome"),
+            "nome_pai": data.get("nome_pai"),
+            "nome_mae": data.get("nome_mae"),
             "cpf": data.get("cpf"),
             "contato": data.get("contato"),
             "data_nasc": data.get("data_nasc"),
