@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from blueprints.adolescentes import adolescentes_bp
 from blueprints.congregacoes import congregacoes_bp
+from blueprints.criancas import criancas_bp
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
@@ -9,7 +10,7 @@ CORS(app)
 # Blueprint
 app.register_blueprint(adolescentes_bp, url_prefix="/adolescentes")
 app.register_blueprint(congregacoes_bp, url_prefix="/congregacoes")
-
+app.register_blueprint(criancas_bp, url_prefix="/criancas")
 
 # Rota principal → abre o index.html correto
 @app.get("/")
