@@ -106,8 +106,12 @@ def atualizar(id):
             }
         }
 
-        supabase.table("criancas").update(atualizada).eq("id", id).execute()
-        return jsonify({"msg": "Atualizado com sucesso"})
+        resp = supabase.table("criancas").update(atualizada).eq("id", id).execute()
+        if not resp.data:
+            return jsonify({"erro": "Erro ao atualizar criança"}), 400
+
+        return jsonify(resp.data[0]), 200
+
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
