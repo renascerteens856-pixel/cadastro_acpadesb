@@ -74,7 +74,11 @@ def cadastrar():
         }
 
         result = supabase.table("criancas").insert(nova).execute()
-        return jsonify(result.data), 201
+        if not result.data:
+            return jsonify({"erro": "Erro ao inserir criança"}), 400
+
+        return jsonify(result.data[0]), 201
+
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
