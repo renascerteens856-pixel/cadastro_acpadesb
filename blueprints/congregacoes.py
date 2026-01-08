@@ -20,7 +20,7 @@ def listar():
             supabase
             .table(TABELA)
             .select("id, nome")
-            .order("id")
+            .order("nome")
             .execute()
         )
 
