@@ -156,7 +156,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const API="https://cadastro-adolescentes.onrender.com";
+const API="https://cadastro-adolescentes.onrender.com/";
 const modalPessoa=new bootstrap.Modal(document.getElementById("modalPessoa"));
 const modalCong=new bootstrap.Modal(document.getElementById("modalCongregacao"));
 
@@ -249,24 +249,35 @@ function editarPessoa(id,tipo){
   modalPessoa.show();
 }
 
+/* ================= POST / PUT V1.1 ================= */
 async function salvarPessoa(e){
   e.preventDefault();
-  const tipo=tipoPessoa.value;
-  const id=pessoaId.value;
+
+  const tipo = tipoPessoa.value;
+  const id = pessoaId.value;
+
+  const payload = { nome: nome.value };
+
+  if (nome_pai.value) payload.nome_pai = nome_pai.value;
+  if (nome_mae.value) payload.nome_mae = nome_mae.value;
+  if (cpf.value) payload.cpf = cpf.value;
+  if (contato.value) payload.contato = contato.value;
+  if (data_nasc.value) payload.data_nasc = data_nasc.value;
+
+  if (congregacao.value) payload.congregacao = Number(congregacao.value);
+
+  if (rua.value || numero.value || bairro.value) {
+    payload.endereco = {
+      rua: rua.value || null,
+      numero: numero.value || null,
+      bairro: bairro.value || null
+    };
+  }
 
   await fetch(API+"/"+tipo+"/"+(id||""),{
     method:id?"PUT":"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      nome:nome.value,
-      nome_pai:nome_pai.value,
-      nome_mae:nome_mae.value,
-      cpf:cpf.value,
-      contato:contato.value,
-      data_nasc:data_nasc.value,
-      congregacao:Number(congregacao.value),
-      endereco:{rua:rua.value,numero:numero.value,bairro:bairro.value}
-    })
+    body:JSON.stringify(payload)
   });
 
   modalPessoa.hide();
@@ -332,4 +343,3 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 </body>
 </html>
-
