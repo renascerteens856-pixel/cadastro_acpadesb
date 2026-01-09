@@ -61,7 +61,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 <div class="card shadow">
 <div class="card-header d-flex justify-content-between">
   <h5>Crianças</h5>
-  <button class="btn btn-success" onclick="novaCrianca()">Nova</button>
+  <button class="btn btn-success" onclick="novaCrianca()">Novo</button>
 </div>
 
 <div class="card-body table-responsive">
@@ -166,11 +166,9 @@ let congregacoes={}, cacheAdolescentes=[], cacheCriancas=[];
 async function carregarCongregacoes(){
   const r=await fetch(API+"/congregacoes/");
   const dados=await r.json();
-
   congregacoes={};
   congregacao.innerHTML="";
   listaCongregacoes.innerHTML="";
-
   dados.forEach(c=>{
     congregacoes[c.id]=c.nome;
     congregacao.innerHTML+=`<option value="${c.id}">${c.nome}</option>`;
@@ -231,8 +229,8 @@ function abrirPessoa(tipo){
 }
 
 function editarPessoa(id,tipo){
-  const lista = tipo==="criancas"?cacheCriancas:cacheAdolescentes;
-  const p = lista.find(x=>x.id===id);
+  const lista=tipo==="criancas"?cacheCriancas:cacheAdolescentes;
+  const p=lista.find(x=>x.id===id);
   pessoaId.value=p.id;
   tipoPessoa.value=tipo;
   nome.value=p.nome||"";
@@ -249,37 +247,25 @@ function editarPessoa(id,tipo){
   modalPessoa.show();
 }
 
-/* ================= POST / PUT V1.1 ================= */
 async function salvarPessoa(e){
   e.preventDefault();
-
-  const tipo = tipoPessoa.value;
-  const id = pessoaId.value;
-
-  const payload = { nome: nome.value };
-
-  if (nome_pai.value) payload.nome_pai = nome_pai.value;
-  if (nome_mae.value) payload.nome_mae = nome_mae.value;
-  if (cpf.value) payload.cpf = cpf.value;
-  if (contato.value) payload.contato = contato.value;
-  if (data_nasc.value) payload.data_nasc = data_nasc.value;
-
-  if (congregacao.value) payload.congregacao = Number(congregacao.value);
-
-  if (rua.value || numero.value || bairro.value) {
-    payload.endereco = {
-      rua: rua.value || null,
-      numero: numero.value || null,
-      bairro: bairro.value || null
-    };
+  const tipo=tipoPessoa.value;
+  const id=pessoaId.value;
+  const payload={ nome:nome.value };
+  if(nome_pai.value) payload.nome_pai=nome_pai.value;
+  if(nome_mae.value) payload.nome_mae=nome_mae.value;
+  if(cpf.value) payload.cpf=cpf.value;
+  if(contato.value) payload.contato=contato.value;
+  if(data_nasc.value) payload.data_nasc=data_nasc.value;
+  if(congregacao.value) payload.congregacao=Number(congregacao.value);
+  if(rua.value||numero.value||bairro.value){
+    payload.endereco={rua,numero,bairro};
   }
-
   await fetch(API+"/"+tipo+"/"+(id||""),{
     method:id?"PUT":"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(payload)
   });
-
   modalPessoa.hide();
   listarAdolescentes();
   listarCriancas();
@@ -302,13 +288,18 @@ async function listarAdolescentes(){
     const e=a.endereco||{};
     listaAdolescentes.innerHTML+=`
       <tr>
-        <td>${a.nome}</td><td>${a.nome_pai||"-"}</td><td>${a.nome_mae||"-"}</td>
-        <td>${a.cpf||"-"}</td><td>${a.contato||"-"}</td><td>${a.data_nasc||"-"}</td>
+        <td>${a.nome}</td>
+        <td>${a.nome_pai||"-"}</td>
+        <td>${a.nome_mae||"-"}</td>
+        <td>${a.cpf||"-"}</td>
+        <td>${a.contato||"-"}</td>
+        <td>${a.data_nasc||"-"}</td>
         <td>${congregacoes[a.congregacao]||"-"}</td>
         <td>${e.rua||""} ${e.numero||""} ${e.bairro||""}</td>
         <td>
           <button class="btn btn-sm btn-primary" onclick="editarPessoa(${a.id},'adolescentes')">Alterar</button>
           <button class="btn btn-sm btn-danger" onclick="excluirPessoa(${a.id},'adolescentes')">Excluir</button>
+          <button class="btn btn-sm btn-secondary" onclick="imprimirPessoa(${a.id},'adolescentes')">Imprimir</button>
         </td>
       </tr>`;
   });
@@ -322,16 +313,56 @@ async function listarCriancas(){
     const e=c.endereco||{};
     listaCriancas.innerHTML+=`
       <tr>
-        <td>${c.nome}</td><td>${c.nome_pai||"-"}</td><td>${c.nome_mae||"-"}</td>
-        <td>${c.cpf||"-"}</td><td>${c.contato||"-"}</td><td>${c.data_nasc||"-"}</td>
+        <td>${c.nome}</td>
+        <td>${c.nome_pai||"-"}</td>
+        <td>${c.nome_mae||"-"}</td>
+        <td>${c.cpf||"-"}</td>
+        <td>${c.contato||"-"}</td>
+        <td>${c.data_nasc||"-"}</td>
         <td>${congregacoes[c.congregacao]||"-"}</td>
         <td>${e.rua||""} ${e.numero||""} ${e.bairro||""}</td>
         <td>
           <button class="btn btn-sm btn-primary" onclick="editarPessoa(${c.id},'criancas')">Alterar</button>
           <button class="btn btn-sm btn-danger" onclick="excluirPessoa(${c.id},'criancas')">Excluir</button>
+          <button class="btn btn-sm btn-secondary" onclick="imprimirPessoa(${c.id},'criancas')">Imprimir</button>
         </td>
       </tr>`;
   });
+}
+
+/* ================= IMPRESSÃO ================= */
+function imprimirPessoa(id,tipo){
+  const lista=tipo==="criancas"?cacheCriancas:cacheAdolescentes;
+  const p=lista.find(x=>x.id===id);
+  if(!p) return;
+  const e=p.endereco||{};
+  const cong=congregacoes[p.congregacao]||"-";
+  const w=window.open("","_blank");
+  w.document.write(`
+    <html><head><title>Impressão</title>
+    <style>
+      body{font-family:Arial;padding:40px;}
+      img{display:block;margin:0 auto 20px;max-width:200px;}
+      table{width:100%;border-collapse:collapse;}
+      td{border:1px solid #333;padding:8px;}
+      h2{text-align:center;}
+    </style></head><body>
+    <img src="/static/Images/ACP_Escuro.png">
+    <h2>${tipo==="criancas"?"Cadastro de Criança":"Cadastro de Adolescente"}</h2>
+    <table>
+      <tr><td>Nome</td><td>${p.nome}</td></tr>
+      <tr><td>Pai</td><td>${p.nome_pai||"-"}</td></tr>
+      <tr><td>Mãe</td><td>${p.nome_mae||"-"}</td></tr>
+      <tr><td>CPF</td><td>${p.cpf||"-"}</td></tr>
+      <tr><td>Contato</td><td>${p.contato||"-"}</td></tr>
+      <tr><td>Nascimento</td><td>${p.data_nasc||"-"}</td></tr>
+      <tr><td>Congregação</td><td>${cong}</td></tr>
+      <tr><td>Endereço</td><td>${e.rua||""} ${e.numero||""} ${e.bairro||""}</td></tr>
+    </table>
+    <script>window.print();<\/script>
+    </body></html>
+  `);
+  w.document.close();
 }
 
 document.addEventListener("DOMContentLoaded",async()=>{
@@ -343,4 +374,3 @@ document.addEventListener("DOMContentLoaded",async()=>{
 
 </body>
 </html>
-
