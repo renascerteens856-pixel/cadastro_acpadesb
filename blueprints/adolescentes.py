@@ -49,6 +49,51 @@ def listar():
 
 
 # ======================================================
+# BUSCAR POR NOME
+# ======================================================
+@adolescentes_bp.route("/buscar", methods=["GET"])
+def buscar_por_nome():
+    try:
+        nome = request.args.get("nome", "").strip()
+
+        if not nome:
+            return jsonify([]), 200
+
+        resp = (
+            supabase
+            .table("adolescentes")
+            .select(
+                "id, nome, nome_pai, nome_mae, cpf, contato, data_nasc, congregacao, endereco"
+            )
+            .ilike("nome", f"%{nome}%")
+            .order("nome")
+            .execute()
+        )
+
+        dados = resp.data or []
+
+        resultado = []
+        for a in dados:
+            resultado.append({
+                "id": a.get("id"),
+                "nome": a.get("nome"),
+                "nome_pai": a.get("nome_pai"),
+                "nome_mae": a.get("nome_mae"),
+                "cpf": a.get("cpf"),
+                "contato": a.get("contato"),
+                "data_nasc": a.get("data_nasc"),
+                "congregacao": a.get("congregacao"),
+                "endereco": a.get("endereco") or {}
+            })
+
+        return jsonify(resultado), 200
+
+    except Exception as e:
+        print("ERRO BUSCAR:", e)
+        return jsonify([]), 200
+
+
+# ======================================================
 # CADASTRAR
 # ======================================================
 @adolescentes_bp.route("/", methods=["POST"])
