@@ -48,6 +48,43 @@ def listar():
         return jsonify([]), 200  # nunca quebra o front
 
 
+@criancas_bp.route("/nome/<string:nome>", methods=["GET"])
+def buscar_por_nome_exato(nome):
+    try:
+        resp = (
+            supabase
+            .table("criancas")
+            .select(
+                "id, nome, nome_pai, nome_mae, cpf, contato, data_nasc, congregacao, endereco"
+            )
+            .ilike("nome", f"%{nome}%")
+            .order("nome")
+            .execute()
+        )
+
+        dados = resp.data or []
+
+        resultado = []
+        for a in dados:
+            resultado.append({
+                "id": a.get("id"),
+                "nome": a.get("nome"),
+                "nome_pai": a.get("nome_pai"),
+                "nome_mae": a.get("nome_mae"),
+                "cpf": a.get("cpf"),
+                "contato": a.get("contato"),
+                "data_nasc": a.get("data_nasc"),
+                "congregacao": a.get("congregacao"),
+                "endereco": a.get("endereco") or {}
+            })
+
+        return jsonify(resultado), 200
+
+    except Exception as e:
+        print("ERRO BUSCAR POR NOME:", e)
+        return jsonify({"erro": str(e)}), 500
+
+
 # ======================================================
 # CADASTRAR
 # ======================================================
