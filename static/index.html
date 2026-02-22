@@ -42,6 +42,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
   <div>
     <input class="form-control d-inline-block me-2" style="width:220px"
       placeholder="Buscar por nome"
+      id="buscaAdolescentes"
       onkeyup="buscarAdolescentesPorNome(this.value)">
     <button class="btn btn-success" onclick="novoAdolescente()">Novo</button>
   </div>
@@ -68,9 +69,15 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 <!-- ================= CRIANÇAS ================= -->
 <div class="tab-pane fade" id="tabCriancas">
 <div class="card shadow">
-<div class="card-header d-flex justify-content-between">
+<div class="card-header d-flex justify-content-between align-items-center">
   <h5>Crianças</h5>
-  <button class="btn btn-success" onclick="novaCrianca()">Novo</button>
+  <div>
+    <input class="form-control d-inline-block me-2" style="width:220px"
+      placeholder="Buscar por nome"
+      id="buscaCriancas"
+      onkeyup="buscarCriancasPorNome(this.value)">
+    <button class="btn btn-success" onclick="novaCrianca()">Novo</button>
+  </div>
 </div>
 
 <div class="card-body table-responsive">
@@ -80,6 +87,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
   <th>Nome</th>
   <th>Pai</th>
   <th>Mãe</th>
+  <th>Contato</th>
   <th>Congregação</th>
   <th>Ações</th>
 </tr>
@@ -186,11 +194,12 @@ async function carregarCongregacoes(){
   const r=await fetch(API+"/congregacoes/");
   const dados=await r.json();
   congregacoes={};
-  congregacao.innerHTML="";
+  const selectCong = document.getElementById("congregacao");
+  selectCong.innerHTML="";
   listaCongregacoes.innerHTML="";
   dados.forEach(c=>{
     congregacoes[c.id]=c.nome;
-    congregacao.innerHTML+=`<option value="${c.id}">${c.nome}</option>`;
+    selectCong.innerHTML+=`<option value="${c.id}">${c.nome}</option>`;
     listaCongregacoes.innerHTML+=`
       <tr>
         <td>${c.nome}</td>
@@ -203,26 +212,26 @@ async function carregarCongregacoes(){
 }
 
 function novaCongregacao(){
-  congregacaoId.value="";
-  congregacaoNome.value="";
-  tituloCongregacao.innerText="Nova Congregação";
+  document.getElementById("congregacaoId").value="";
+  document.getElementById("congregacaoNome").value="";
+  document.getElementById("tituloCongregacao").innerText="Nova Congregação";
   modalCong.show();
 }
 
 function editarCongregacao(id,nome){
-  congregacaoId.value=id;
-  congregacaoNome.value=nome;
-  tituloCongregacao.innerText="Editar Congregação";
+  document.getElementById("congregacaoId").value=id;
+  document.getElementById("congregacaoNome").value=nome;
+  document.getElementById("tituloCongregacao").innerText="Editar Congregação";
   modalCong.show();
 }
 
 async function salvarCongregacao(e){
   e.preventDefault();
-  const id=congregacaoId.value;
+  const id=document.getElementById("congregacaoId").value;
   await fetch(API+"/congregacoes/"+(id||""),{
     method:id?"PUT":"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({nome:congregacaoNome.value})
+    body:JSON.stringify({nome:document.getElementById("congregacaoNome").value})
   });
   modalCong.hide();
   carregarCongregacoes();
@@ -241,9 +250,9 @@ function novaCrianca(){ abrirPessoa("criancas"); }
 
 function abrirPessoa(tipo){
   document.querySelector("#modalPessoa form").reset();
-  pessoaId.value="";
-  tipoPessoa.value=tipo;
-  tituloPessoa.innerText="Novo "+(tipo==="criancas"?"Criança":"Adolescente");
+  document.getElementById("pessoaId").value="";
+  document.getElementById("tipoPessoa").value=tipo;
+  document.getElementById("tituloPessoa").innerText="Novo "+(tipo==="criancas"?"Criança":"Adolescente");
   modalPessoa.show();
 }
 
@@ -251,37 +260,37 @@ function editarPessoa(id,tipo){
   const lista=tipo==="criancas"?cacheCriancas:cacheAdolescentes;
   const p=lista.find(x=>x.id===id);
   if(!p) return;
-  pessoaId.value=p.id;
-  tipoPessoa.value=tipo;
-  nome.value=p.nome||"";
-  nome_pai.value=p.nome_pai||"";
-  nome_mae.value=p.nome_mae||"";
-  contato.value=p.contato||"";
-  congregacao.value=p.congregacao||"";
-  rua.value=p.endereco?.rua||"";
-  numero.value=p.endereco?.numero||"";
-  bairro.value=p.endereco?.bairro||"";
-  tituloPessoa.innerText="Editar";
+  document.getElementById("pessoaId").value=p.id;
+  document.getElementById("tipoPessoa").value=tipo;
+  document.getElementById("nome").value=p.nome||"";
+  document.getElementById("nome_pai").value=p.nome_pai||"";
+  document.getElementById("nome_mae").value=p.nome_mae||"";
+  document.getElementById("contato").value=p.contato||"";
+  document.getElementById("congregacao").value=p.congregacao||"";
+  document.getElementById("rua").value=p.endereco?.rua||"";
+  document.getElementById("numero").value=p.endereco?.numero||"";
+  document.getElementById("bairro").value=p.endereco?.bairro||"";
+  document.getElementById("tituloPessoa").innerText="Editar "+(tipo==="criancas"?"Criança":"Adolescente");
   modalPessoa.show();
 }
 
 async function salvarPessoa(e){
   e.preventDefault();
-  const tipo=tipoPessoa.value;
-  const id=pessoaId.value;
+  const tipo=document.getElementById("tipoPessoa").value;
+  const id=document.getElementById("pessoaId").value;
 
-  const payload={ nome:nome.value };
+  const payload={ nome:document.getElementById("nome").value };
 
-  if(nome_pai.value) payload.nome_pai=nome_pai.value;
-  if(nome_mae.value) payload.nome_mae=nome_mae.value;
-  if(contato.value) payload.contato=contato.value;
-  if(congregacao.value) payload.congregacao=Number(congregacao.value);
+  if(document.getElementById("nome_pai").value) payload.nome_pai=document.getElementById("nome_pai").value;
+  if(document.getElementById("nome_mae").value) payload.nome_mae=document.getElementById("nome_mae").value;
+  if(document.getElementById("contato").value) payload.contato=document.getElementById("contato").value;
+  if(document.getElementById("congregacao").value) payload.congregacao=Number(document.getElementById("congregacao").value);
 
-  if(rua.value||numero.value||bairro.value){
+  if(document.getElementById("rua").value||document.getElementById("numero").value||document.getElementById("bairro").value){
     payload.endereco={
-      rua:rua.value||null,
-      numero:numero.value||null,
-      bairro:bairro.value||null
+      rua:document.getElementById("rua").value||null,
+      numero:document.getElementById("numero").value||null,
+      bairro:document.getElementById("bairro").value||null
     };
   }
 
@@ -294,6 +303,10 @@ async function salvarPessoa(e){
   modalPessoa.hide();
   listarAdolescentes();
   listarCriancas();
+
+  // Limpar campos de busca
+  document.getElementById("buscaAdolescentes").value = "";
+  document.getElementById("buscaCriancas").value = "";
 }
 
 async function excluirPessoa(id,tipo){
@@ -306,9 +319,10 @@ async function excluirPessoa(id,tipo){
 
 /* ================= LISTAS ================= */
 function renderAdolescentes(lista){
-  listaAdolescentes.innerHTML="";
+  const tbody = document.getElementById("listaAdolescentes");
+  tbody.innerHTML="";
   lista.forEach(a=>{
-    listaAdolescentes.innerHTML+=`
+    tbody.innerHTML+=`
       <tr>
         <td>${a.nome}</td>
         <td>${a.nome_pai||"-"}</td>
@@ -325,13 +339,15 @@ function renderAdolescentes(lista){
 }
 
 function renderCriancas(lista){
-  listaCriancas.innerHTML="";
+  const tbody = document.getElementById("listaCriancas");
+  tbody.innerHTML="";
   lista.forEach(c=>{
-    listaCriancas.innerHTML+=`
+    tbody.innerHTML+=`
       <tr>
         <td>${c.nome}</td>
         <td>${c.nome_pai||"-"}</td>
         <td>${c.nome_mae||"-"}</td>
+        <td>${c.contato||"-"}</td>
         <td>${congregacoes[c.congregacao]||"-"}</td>
         <td>
           <button class="btn btn-sm btn-primary" onclick="editarPessoa(${c.id},'criancas')">Editar</button>
@@ -360,11 +376,48 @@ async function buscarAdolescentesPorNome(nome){
     renderAdolescentes(cacheAdolescentes);
     return;
   }
-  const r=await fetch(API+"/adolescentes/buscar?nome="+encodeURIComponent(nome));
-  const dados=await r.json();
-  renderAdolescentes(dados);
+  try {
+    const r=await fetch(API+"/adolescentes/buscar?nome="+encodeURIComponent(nome));
+    const dados=await r.json();
+    renderAdolescentes(dados);
+  } catch (error) {
+    console.error("Erro na busca de adolescentes:", error);
+  }
 }
 
+// NOVA FUNÇÃO: Buscar crianças por nome
+// CORRIGIDA: Buscar crianças por nome
+async function buscarCriancasPorNome(nome){
+  console.log("Buscando criança:", nome); // Log para debug
+
+  if(!nome || nome.trim() === ""){
+    renderCriancas(cacheCriancas);
+    return;
+  }
+
+  try {
+    // Usando a rota /criancas/nome/ que existe no backend
+    const url = API + "/criancas/nome/" + encodeURIComponent(nome.trim());
+    console.log("URL da busca:", url);
+
+    const r = await fetch(url);
+    console.log("Status da resposta:", r.status);
+
+    if (!r.ok) {
+      const errorText = await r.text();
+      console.error("Erro na resposta:", errorText);
+      throw new Error(`Erro HTTP ${r.status}`);
+    }
+
+    const dados = await r.json();
+    console.log("Dados recebidos:", dados);
+
+    renderCriancas(dados);
+  } catch (error) {
+    console.error("Erro na busca de crianças:", error);
+    alert("Erro ao buscar crianças: " + error.message);
+  }
+}
 /* ================= IMPRESSÃO ================= */
 function imprimirPessoa(id,tipo){
   const lista=tipo==="criancas"?cacheCriancas:cacheAdolescentes;
@@ -406,6 +459,15 @@ document.addEventListener("DOMContentLoaded",async()=>{
   await carregarCongregacoes();
   listarAdolescentes();
   listarCriancas();
+
+  // Adicionar listener para tecla Enter nos campos de busca
+  document.getElementById("buscaAdolescentes").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") buscarAdolescentesPorNome(e.target.value);
+  });
+
+  document.getElementById("buscaCriancas").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") buscarCriancasPorNome(e.target.value);
+  });
 });
 </script>
 
