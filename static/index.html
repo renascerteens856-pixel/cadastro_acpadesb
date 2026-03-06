@@ -57,6 +57,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
   <th>Pai</th>
   <th>Mãe</th>
   <th>CPF</th>
+  <th>RG</th>
   <th>Contato</th>
   <th>Data Nasc.</th>
   <th>Congregação</th>
@@ -93,6 +94,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
   <th>Pai</th>
   <th>Mãe</th>
   <th>CPF</th>
+  <th>RG</th>
   <th>Contato</th>
   <th>Data Nasc.</th>
   <th>Congregação</th>
@@ -156,6 +158,16 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 </div>
 
 <div class="col-md-6">
+  <label class="form-label">RG</label>
+  <input class="form-control" id="rg" placeholder="00.000.000-0">
+</div>
+
+<div class="col-md-6">
+  <label class="form-label">Contato</label>
+  <input class="form-control" id="contato" placeholder="(00) 00000-0000">
+</div>
+
+<div class="col-md-6">
   <label class="form-label">Nome do Pai</label>
   <input class="form-control" id="nome_pai">
 </div>
@@ -163,11 +175,6 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 <div class="col-md-6">
   <label class="form-label">Nome da Mãe</label>
   <input class="form-control" id="nome_mae">
-</div>
-
-<div class="col-md-6">
-  <label class="form-label">Contato</label>
-  <input class="form-control" id="contato" placeholder="(00) 00000-0000">
 </div>
 
 <div class="col-md-6">
@@ -236,7 +243,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const API = "https://cadastro-adolescentes.onrender.com";
+const API = "http://127.0.0.1:5000";
 
 const modalPessoa = new bootstrap.Modal(document.getElementById("modalPessoa"));
 const modalCong = new bootstrap.Modal(document.getElementById("modalCongregacao"));
@@ -343,6 +350,7 @@ function editarPessoa(id, tipo) {
   document.getElementById("nome_pai").value = p.nome_pai || "";
   document.getElementById("nome_mae").value = p.nome_mae || "";
   document.getElementById("cpf").value = p.cpf || "";
+  document.getElementById("rg").value = p.rg || "";
   document.getElementById("contato").value = p.contato || "";
   document.getElementById("data_nasc").value = p.data_nasc || "";
   document.getElementById("congregacao").value = p.congregacao || "";
@@ -359,12 +367,13 @@ async function salvarPessoa(e) {
   const tipo = document.getElementById("tipoPessoa").value;
   const id = document.getElementById("pessoaId").value;
 
-  // Construir payload com TODOS os campos do backend
+  // Construir payload com TODOS os campos do backend (incluindo RG)
   const payload = {
     nome: document.getElementById("nome").value,
     nome_pai: document.getElementById("nome_pai").value || null,
     nome_mae: document.getElementById("nome_mae").value || null,
     cpf: document.getElementById("cpf").value || null,
+    rg: document.getElementById("rg").value || null,
     contato: document.getElementById("contato").value || null,
     data_nasc: document.getElementById("data_nasc").value || null,
     congregacao: document.getElementById("congregacao").value ? Number(document.getElementById("congregacao").value) : null,
@@ -418,27 +427,22 @@ function formatarEndereco(endereco) {
   return partes.length ? partes.join(", ") : "-";
 }
 
-// Substitua a função formatarData por esta versão corrigida
 function formatarData(data) {
   if (!data) return "-";
 
-  // Se a data já estiver no formato DD/MM/YYYY, retorna ela mesma
   if (typeof data === 'string' && data.includes('/')) {
     return data;
   }
 
   try {
-    // Para datas no formato YYYY-MM-DD (ISO), extrair partes diretamente
     if (typeof data === 'string' && data.match(/^\d{4}-\d{2}-\d{2}$/)) {
       const [ano, mes, dia] = data.split('-');
       return `${dia}/${mes}/${ano}`;
     }
 
-    // Para outros formatos, tentar converter com cuidado
     const d = new Date(data);
     if (isNaN(d.getTime())) return data;
 
-    // Criar data considerando o fuso UTC para evitar problemas de fuso
     const ano = d.getUTCFullYear();
     const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dia = String(d.getUTCDate()).padStart(2, '0');
@@ -460,6 +464,7 @@ function renderAdolescentes(lista) {
         <td>${a.nome_pai || "-"}</td>
         <td>${a.nome_mae || "-"}</td>
         <td>${a.cpf || "-"}</td>
+        <td>${a.rg || "-"}</td>
         <td>${a.contato || "-"}</td>
         <td>${formatarData(a.data_nasc)}</td>
         <td>${congregacoes[a.congregacao] || "-"}</td>
@@ -484,6 +489,7 @@ function renderCriancas(lista) {
         <td>${c.nome_pai || "-"}</td>
         <td>${c.nome_mae || "-"}</td>
         <td>${c.cpf || "-"}</td>
+        <td>${c.rg || "-"}</td>
         <td>${c.contato || "-"}</td>
         <td>${formatarData(c.data_nasc)}</td>
         <td>${congregacoes[c.congregacao] || "-"}</td>
@@ -549,7 +555,6 @@ async function buscarCriancasPorNome(nome) {
   }
 }
 
-// Corrigir também a função imprimirPessoa para usar a mesma formatação
 function imprimirPessoa(id, tipo) {
   const lista = tipo === "criancas" ? cacheCriancas : cacheAdolescentes;
   const p = lista.find(x => x.id === id);
@@ -557,7 +562,7 @@ function imprimirPessoa(id, tipo) {
 
   const e = p.endereco || {};
   const cong = congregacoes[p.congregacao] || "-";
-  const dataNasc = formatarData(p.data_nasc); // Usando a função corrigida
+  const dataNasc = formatarData(p.data_nasc);
 
   const w = window.open("", "_blank");
   w.document.write(`
@@ -583,6 +588,7 @@ function imprimirPessoa(id, tipo) {
         <tr><th>Nome do Pai</th><td>${p.nome_pai || "-"}</td></tr>
         <tr><th>Nome da Mãe</th><td>${p.nome_mae || "-"}</td></tr>
         <tr><th>CPF</th><td>${p.cpf || "-"}</td></tr>
+        <tr><th>RG</th><td>${p.rg || "-"}</td></tr>
         <tr><th>Contato</th><td>${p.contato || "-"}</td></tr>
         <tr><th>Data de Nascimento</th><td>${dataNasc}</td></tr>
         <tr><th>Congregação</th><td>${cong}</td></tr>
@@ -618,4 +624,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
-
