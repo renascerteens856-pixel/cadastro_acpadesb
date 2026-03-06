@@ -19,7 +19,7 @@ def listar():
             supabase
             .table("adolescentes")
             .select(
-                "id, nome, nome_pai, nome_mae, cpf, contato, data_nasc, congregacao, endereco"
+                "id, nome, nome_pai, nome_mae, cpf, rg, contato, data_nasc, congregacao, endereco"
             )
             .order("nome")
             .execute()
@@ -35,6 +35,7 @@ def listar():
                 "nome_pai": a.get("nome_pai"),
                 "nome_mae": a.get("nome_mae"),
                 "cpf": a.get("cpf"),
+                "rg": a.get("rg"),
                 "contato": a.get("contato"),
                 "data_nasc": a.get("data_nasc"),
                 "congregacao": a.get("congregacao"),
@@ -63,7 +64,7 @@ def buscar_por_nome():
             supabase
             .table("adolescentes")
             .select(
-                "id, nome, nome_pai, nome_mae, cpf, contato, data_nasc, congregacao, endereco"
+                "id, nome, nome_pai, nome_mae, cpf, rg, contato, data_nasc, congregacao, endereco"
             )
             .ilike("nome", f"%{nome}%")
             .order("nome")
@@ -80,6 +81,7 @@ def buscar_por_nome():
                 "nome_pai": a.get("nome_pai"),
                 "nome_mae": a.get("nome_mae"),
                 "cpf": a.get("cpf"),
+                "rg": a.get("rg"),
                 "contato": a.get("contato"),
                 "data_nasc": a.get("data_nasc"),
                 "congregacao": a.get("congregacao"),
@@ -106,6 +108,7 @@ def cadastrar():
             "nome_pai": data.get("nome_pai"),
             "nome_mae": data.get("nome_mae"),
             "cpf": data.get("cpf"),
+            "rg": data.get("rg"),
             "contato": data.get("contato"),
             "data_nasc": data.get("data_nasc"),
             "congregacao": data.get("congregacao"),
@@ -138,6 +141,7 @@ def atualizar(id):
             "nome_pai": data.get("nome_pai"),
             "nome_mae": data.get("nome_mae"),
             "cpf": data.get("cpf"),
+            "rg": data.get("rg"),
             "contato": data.get("contato"),
             "data_nasc": data.get("data_nasc"),
             "congregacao": data.get("congregacao"),
