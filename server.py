@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from flask_cors import CORS
 from blueprints.adolescentes import adolescentes_bp
 from blueprints.congregacoes import congregacoes_bp
@@ -28,6 +28,13 @@ def send_static(path):
 def ping():
     return jsonify({"status": "ok", "mensagem": "API funcionando!"})
 
+# Rota de teste para diagnosticar problemas
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"}), 200
+
 if __name__ == "__main__":
+    # PEGAR A PORTA DA VARIÁVEL DE AMBIENTE (Render exige isso)
     port = int(os.environ.get('PORT', 10000))
+    # BIND NO HOST 0.0.0.0 (Render exige isso)
     app.run(host='0.0.0.0', port=port)
