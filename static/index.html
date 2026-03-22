@@ -313,11 +313,9 @@ function exportarParaExcel(tipo) {
   const lista = tipo === 'adolescentes' ? cacheAdolescentes : cacheCriancas;
   const dadosFormatados = formatarDadosParaExportacao(lista, tipo);
 
-  // Criar worksheet
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(dadosFormatados);
 
-  // Ajustar largura das colunas
   const colWidths = [
     { wch: 8 },  // ID
     { wch: 30 }, // Nome
@@ -334,12 +332,10 @@ function exportarParaExcel(tipo) {
 
   XLSX.utils.book_append_sheet(wb, ws, tipo.charAt(0).toUpperCase() + tipo.slice(1));
 
-  // Gerar nome do arquivo com data
   const data = new Date();
   const dataStr = `${data.getDate()}-${data.getMonth()+1}-${data.getFullYear()}`;
   const nomeArquivo = `ACPADESB_${tipo}_${dataStr}.xlsx`;
 
-  // Salvar arquivo
   XLSX.writeFile(wb, nomeArquivo);
 }
 
@@ -347,21 +343,17 @@ function exportarParaGoogleSheets(tipo) {
   const lista = tipo === 'adolescentes' ? cacheAdolescentes : cacheCriancas;
   const dadosFormatados = formatarDadosParaExportacao(lista, tipo);
 
-  // Converter para CSV
   const ws = XLSX.utils.json_to_sheet(dadosFormatados);
   const csv = XLSX.utils.sheet_to_csv(ws);
 
-  // Criar URL com dados
   const csvData = new Blob([csv], { type: 'text/csv' });
   const csvUrl = URL.createObjectURL(csvData);
 
-  // Abrir link para download
   const link = document.createElement('a');
   link.href = csvUrl;
   link.download = `ACPADESB_${tipo}_para_google_sheets.csv`;
   link.click();
 
-  // Mostrar instruções
   alert('Arquivo CSV gerado! Para importar no Google Sheets:\n1. Abra o Google Sheets\n2. Clique em Arquivo > Importar\n3. Faça upload do arquivo CSV');
 }
 
@@ -369,7 +361,6 @@ function exportarParaCSV(tipo) {
   const lista = tipo === 'adolescentes' ? cacheAdolescentes : cacheCriancas;
   const dadosFormatados = formatarDadosParaExportacao(lista, tipo);
 
-  // Criar CSV manualmente para ter mais controle
   const cabecalhos = ['ID', 'Nome', 'Pai', 'Mãe', 'CPF', 'RG', 'Contato', 'Data Nasc.', 'Congregação', 'Endereço'];
 
   let csv = cabecalhos.join(';') + '\n';
@@ -390,8 +381,7 @@ function exportarParaCSV(tipo) {
     csv += linha.join(';') + '\n';
   });
 
-  // Criar e baixar arquivo
-  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' }); // \uFEFF para BOM (acentuação)
+  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
 
@@ -443,6 +433,32 @@ function exportarCongregacoesParaCSV() {
   link.click();
 }
 
+// ================= FUNÇÃO DE MIGRAÇÃO AUTOMÁTICA =================
+async function executarMigracaoAutomatica() {
+  try {
+    console.log("🔄 Verificando crianças com 12 anos ou mais...");
+    const r = await fetch(API + "/criancas/migrar-para-adolescentes", {
+      method: "POST"
+    });
+    const resultado = await r.json();
+
+    if (resultado.status === "ok") {
+      if (resultado.migradas && resultado.migradas.length > 0) {
+        console.log(`✅ ${resultado.migradas.length} criança(s) migrada(s) para adolescentes:`, resultado.migradas);
+      } else {
+        console.log("ℹ️ Nenhuma criança com 12 anos ou mais encontrada.");
+      }
+      if (resultado.erros && resultado.erros.length > 0) {
+        console.warn("⚠️ Erros durante a migração:", resultado.erros);
+      }
+    } else {
+      console.error("❌ Erro na migração:", resultado.erro);
+    }
+  } catch (error) {
+    console.error("❌ Erro ao executar migração automática:", error);
+  }
+}
+
 // ================= CONGREGAÇÕES =================
 async function carregarCongregacoes() {
   try {
@@ -459,15 +475,14 @@ async function carregarCongregacoes() {
       congregacoes[c.id] = c.nome;
       selectCong.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
       tbody.innerHTML += `
-        <tr>
+         <tr>
           <td>${c.id}</td>
           <td>${c.nome}</td>
           <td>
             <button class="btn btn-sm btn-primary" onclick="editarCongregacao(${c.id}, '${c.nome}')">Editar</button>
             <button class="btn btn-sm btn-danger" onclick="excluirCongregacao(${c.id})">Excluir</button>
-
           </td>
-        </tr>`;
+         </tr>`;
     });
   } catch (error) {
     console.error("Erro ao carregar congregações:", error);
@@ -559,7 +574,6 @@ async function salvarPessoa(e) {
   const tipo = document.getElementById("tipoPessoa").value;
   const id = document.getElementById("pessoaId").value;
 
-  // Construir payload com TODOS os campos do backend (incluindo RG)
   const payload = {
     nome: document.getElementById("nome").value,
     nome_pai: document.getElementById("nome_pai").value || null,
@@ -584,10 +598,13 @@ async function salvarPessoa(e) {
     });
 
     modalPessoa.hide();
+
+    // Executar migração após salvar e recarregar listas
+    await executarMigracaoAutomatica();
+
     listarAdolescentes();
     listarCriancas();
 
-    // Limpar campos de busca
     document.getElementById("buscaAdolescentes").value = "";
     document.getElementById("buscaCriancas").value = "";
   } catch (error) {
@@ -600,6 +617,10 @@ async function excluirPessoa(id, tipo) {
   if (confirm("Excluir registro?")) {
     try {
       await fetch(API + "/" + tipo + "/" + id, { method: "DELETE" });
+
+      // Executar migração após excluir
+      await executarMigracaoAutomatica();
+
       listarAdolescentes();
       listarCriancas();
     } catch (error) {
@@ -690,11 +711,6 @@ function renderCriancas(lista) {
           <button class="btn btn-sm btn-primary" onclick="editarPessoa(${c.id}, 'criancas')">Editar</button>
           <button class="btn btn-sm btn-danger" onclick="excluirPessoa(${c.id}, 'criancas')">Excluir</button>
           <button class="btn btn-sm btn-secondary" onclick="imprimirPessoa(${c.id}, 'criancas')">Imprimir</button>
-          <div class="btn-group">
-  <button class="btn btn-warning" onclick="migrarAdolescentes()">
-    🔄 Verificar e Migrar (12+ anos)
-  </button>
-</div>
         </td>
       </tr>`;
   });
@@ -805,10 +821,19 @@ function imprimirPessoa(id, tipo) {
 
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", async () => {
-  await carregarCongregacoes();
-  listarAdolescentes();
-  listarCriancas();
+  console.log("🚀 Iniciando aplicação...");
 
+  // Carregar dados
+  await carregarCongregacoes();
+
+  // EXECUTAR MIGRAÇÃO AUTOMATICAMENTE AO CARREGAR A PÁGINA
+  await executarMigracaoAutomatica();
+
+  // Carregar listas após migração
+  await listarAdolescentes();
+  await listarCriancas();
+
+  // Eventos de busca
   document.getElementById("buscaAdolescentes").addEventListener("keypress", (e) => {
     if (e.key === "Enter") buscarAdolescentesPorNome(e.target.value);
   });
@@ -816,35 +841,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("buscaCriancas").addEventListener("keypress", (e) => {
     if (e.key === "Enter") buscarCriancasPorNome(e.target.value);
   });
+
+  console.log("✅ Aplicação carregada. Migração automática executada.");
 });
-
-async function migrarAdolescentes() {
-  if (confirm("⚠️ ATENÇÃO: Isso vai verificar todas as crianças com 12 anos ou mais e movê-las para a lista de adolescentes. Deseja continuar?")) {
-    try {
-      const r = await fetch(API + "/criancas/migrar-para-adolescentes", {
-        method: "POST"
-      });
-      const resultado = await r.json();
-
-      if (resultado.status === "ok") {
-        alert(resultado.mensagem);
-        console.log("Migradas:", resultado.migradas);
-        if (resultado.erros && resultado.erros.length > 0) {
-          console.error("Erros:", resultado.erros);
-        }
-        // Recarregar listas
-        listarCriancas();
-        listarAdolescentes();
-        carregarCongregacoes();
-      } else {
-        alert("Erro: " + resultado.erro);
-      }
-    } catch (error) {
-      console.error("Erro ao migrar:", error);
-      alert("Erro ao migrar: " + error.message);
-    }
-  }
-}
 </script>
 
 </body>
