@@ -278,7 +278,7 @@ th, td { text-align:center; vertical-align:middle; font-size:14px; }
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const API = "https://cadastro-acpadesb.onrender.com";
+const API = "http://127.0.0.1:5000";
 
 const modalPessoa = new bootstrap.Modal(document.getElementById("modalPessoa"));
 const modalCong = new bootstrap.Modal(document.getElementById("modalCongregacao"));
@@ -465,6 +465,7 @@ async function carregarCongregacoes() {
           <td>
             <button class="btn btn-sm btn-primary" onclick="editarCongregacao(${c.id}, '${c.nome}')">Editar</button>
             <button class="btn btn-sm btn-danger" onclick="excluirCongregacao(${c.id})">Excluir</button>
+
           </td>
         </tr>`;
     });
@@ -689,6 +690,11 @@ function renderCriancas(lista) {
           <button class="btn btn-sm btn-primary" onclick="editarPessoa(${c.id}, 'criancas')">Editar</button>
           <button class="btn btn-sm btn-danger" onclick="excluirPessoa(${c.id}, 'criancas')">Excluir</button>
           <button class="btn btn-sm btn-secondary" onclick="imprimirPessoa(${c.id}, 'criancas')">Imprimir</button>
+          <div class="btn-group">
+  <button class="btn btn-warning" onclick="migrarAdolescentes()">
+    🔄 Verificar e Migrar (12+ anos)
+  </button>
+</div>
         </td>
       </tr>`;
   });
@@ -811,6 +817,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.key === "Enter") buscarCriancasPorNome(e.target.value);
   });
 });
+
+async function migrarAdolescentes() {
+  if (confirm("⚠️ ATENÇÃO: Isso vai verificar todas as crianças com 12 anos ou mais e movê-las para a lista de adolescentes. Deseja continuar?")) {
+    try {
+      const r = await fetch(API + "/criancas/migrar-para-adolescentes", {
+        method: "POST"
+      });
+      const resultado = await r.json();
+
+      if (resultado.status === "ok") {
+        alert(resultado.mensagem);
+        console.log("Migradas:", resultado.migradas);
+        if (resultado.erros && resultado.erros.length > 0) {
+          console.error("Erros:", resultado.erros);
+        }
+        // Recarregar listas
+        listarCriancas();
+        listarAdolescentes();
+        carregarCongregacoes();
+      } else {
+        alert("Erro: " + resultado.erro);
+      }
+    } catch (error) {
+      console.error("Erro ao migrar:", error);
+      alert("Erro ao migrar: " + error.message);
+    }
+  }
+}
 </script>
 
 </body>
