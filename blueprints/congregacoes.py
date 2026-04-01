@@ -1,8 +1,6 @@
 from flask import Blueprint, request, jsonify
 from db_config import connect_db
-
-supabase = connect_db()
-TABELA = "congregacoes"
+import traceback
 
 congregacoes_bp = Blueprint(
     "congregacoes",
@@ -10,132 +8,112 @@ congregacoes_bp = Blueprint(
     url_prefix="/congregacoes"
 )
 
-# =========================
-# LISTAR TODOS
-# =========================
+
+# ======================================================
+# LISTAR TODAS
+# ======================================================
 @congregacoes_bp.route("/", methods=["GET"])
 def listar():
     try:
-        response = (
-            supabase
-            .table(TABELA)
-            .select("id, nome")
-            .order("nome")
-            .execute()
-        )
+        supabase = connect_db()
+        resp = supabase.table("congregacoes").select("*").order("nome").execute()
 
-        return jsonify(response.data or []), 200
+        dados = resp.data if resp.data else []
 
-    except Exception as e:
-        return jsonify({
-            "erro": "Erro ao listar congregações",
-            "detalhes": str(e)
-        }), 500
+        resultado = []
+        for item in dados:
+            resultado.append({
+                "id": item.get("id"),
+                "nome": item.get("nome")
+            })
 
-
-# =========================
-# BUSCAR UM
-# =========================
-@congregacoes_bp.route("/<int:id>", methods=["GET"])
-def buscar(id):
-    try:
-        response = (
-            supabase
-            .table(TABELA)
-            .select("id, nome")
-            .eq("id", id)
-            .single()
-            .execute()
-        )
-
-        if not response.data:
-            return jsonify({"erro": "Congregação não encontrada"}), 404
-
-        return jsonify(response.data), 200
+        return jsonify(resultado), 200
 
     except Exception as e:
-        return jsonify({
-            "erro": "Erro ao buscar congregação",
-            "detalhes": str(e)
-        }), 500
+        print("ERRO LISTAR CONGREGAÇÕES:", str(e))
+        traceback.print_exc()
+        return jsonify([]), 200
 
 
-# =========================
+# ======================================================
 # CADASTRAR
-# =========================
+# ======================================================
 @congregacoes_bp.route("/", methods=["POST"])
 def cadastrar():
     try:
-        data = request.get_json() or {}
+        supabase = connect_db()
+        data = request.get_json()
 
-        if not data.get("nome"):
-            return jsonify({"erro": "Campo 'nome' é obrigatório"}), 400
+        if not data or not data.get("nome"):
+            return jsonify({"erro": "Nome é obrigatório"}), 400
 
-        response = (
-            supabase
-            .table(TABELA)
-            .insert({"nome": data["nome"]})
-            .execute()
-        )
+        nova = {"nome": data.get("nome").strip()}
+        resp = supabase.table("congregacoes").insert(nova).execute()
 
-        return jsonify(response.data[0]), 201
+        if not resp.data:
+            return jsonify({"erro": "Erro ao inserir"}), 400
+
+        return jsonify({
+            "id": resp.data[0].get("id"),
+            "nome": resp.data[0].get("nome")
+        }), 201
 
     except Exception as e:
-        return jsonify({
-            "erro": "Erro ao cadastrar congregação",
-            "detalhes": str(e)
-        }), 500
+        print("ERRO CADASTRAR:", str(e))
+        return jsonify({"erro": str(e)}), 500
 
 
-# =========================
+# ======================================================
 # ATUALIZAR
-# =========================
+# ======================================================
 @congregacoes_bp.route("/<int:id>", methods=["PUT"])
 def atualizar(id):
     try:
-        data = request.get_json() or {}
+        supabase = connect_db()
+        data = request.get_json()
 
-        response = (
-            supabase
-            .table(TABELA)
-            .update({"nome": data.get("nome")})
-            .eq("id", id)
-            .execute()
-        )
+        if not data or not data.get("nome"):
+            return jsonify({"erro": "Nome é obrigatório"}), 400
 
-        if not response.data:
+        # Verificar se existe
+        check = supabase.table("congregacoes").select("*").eq("id", id).execute()
+        if not check.data:
             return jsonify({"erro": "Congregação não encontrada"}), 404
 
-        return jsonify(response.data[0]), 200
+        atualizada = {"nome": data.get("nome").strip()}
+        resp = supabase.table("congregacoes").update(atualizada).eq("id", id).execute()
+
+        return jsonify({
+            "id": resp.data[0].get("id"),
+            "nome": resp.data[0].get("nome")
+        }), 200
 
     except Exception as e:
-        return jsonify({
-            "erro": "Erro ao atualizar congregação",
-            "detalhes": str(e)
-        }), 500
+        print("ERRO ATUALIZAR:", str(e))
+        return jsonify({"erro": str(e)}), 500
 
 
-# =========================
+# ======================================================
 # DELETAR
-# =========================
+# ======================================================
 @congregacoes_bp.route("/<int:id>", methods=["DELETE"])
 def deletar(id):
     try:
-        response = (
-            supabase
-            .table(TABELA)
-            .delete()
-            .eq("id", id)
-            .execute()
-        )
+        supabase = connect_db()
 
-        if not response.data:
-            return jsonify({"erro": "Congregação não encontrada"}), 404
+        # Verificar se existem registros vinculados
+        check_adolescentes = supabase.table("adolescentes").select("id").eq("congregacao", id).execute()
+        check_criancas = supabase.table("criancas").select("id").eq("congregacao", id).execute()
 
-        return jsonify({"ok": True}), 200
+        if check_adolescentes.data and len(check_adolescentes.data) > 0:
+            return jsonify({"erro": "Existem adolescentes vinculados a esta congregação"}), 400
+        if check_criancas.data and len(check_criancas.data) > 0:
+            return jsonify({"erro": "Existem crianças vinculadas a esta congregação"}), 400
+
+        supabase.table("congregacoes").delete().eq("id", id).execute()
+
+        return jsonify({"ok": True, "mensagem": "Congregação excluída"}), 200
 
     except Exception as e:
-        return jsonify({
-            "erro": "Erro ao deletar congregação",
-            "detalhes": str(e)
-        }), 500
+        print("ERRO DELETAR:", str(e))
+        return jsonify({"erro": str(e)}), 500
